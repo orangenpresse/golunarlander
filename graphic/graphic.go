@@ -7,44 +7,40 @@ import (
 )
 
 type Vector2D struct {
-	x float64
-	y float64
+	X float64
+	Y float64
 }
 
-type Lander interface {
+type SdlLander interface {
 	GetPosition() Vector2D
 }
 
-type SdlLander struct {
-	Lander
-}
-
-type LanderGrapic struct {
+type LanderGraphic struct {
 	run     bool
-	width   int64
-	height  int64
+	Width   int64
+	Height  int64
 	surface *sdl.Surface
 	window  *sdl.Window
-	Lander  *SdlLander
+	Lander  SdlLander
 }
 
-func (lg *LanderGrapic) start() {
+func (lg *LanderGraphic) Start() {
 	lg.run = true
-	lg.window = sdl.CreateWindow("Lunar Lander", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int(lg.width), int(lg.height), sdl.WINDOW_SHOWN)
+	lg.window = sdl.CreateWindow("Lunar Lander", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int(lg.Width), int(lg.Height), sdl.WINDOW_SHOWN)
 	lg.surface = lg.window.GetSurface()
 	lg.render()
 	lg.end()
 }
 
-func (lg *LanderGrapic) end() {
+func (lg *LanderGraphic) end() {
 	lg.window.Destroy()
 }
 
-func (lg *LanderGrapic) render() {
+func (lg *LanderGraphic) render() {
 	for lg.run == true {
 		lg.clearSurface()
-		lg.RenderMoonSurface()
-		//lg.RenderLander()
+		lg.renderMoonSurface()
+		lg.renderLander()
 		lg.window.UpdateSurface()
 
 		event := sdl.PollEvent()
@@ -58,23 +54,23 @@ func (lg *LanderGrapic) render() {
 	}
 }
 
-func (lg *LanderGrapic) clearSurface() {
-	rect := sdl.Rect{0, 0, int32(lg.width), int32(lg.height)}
+func (lg *LanderGraphic) clearSurface() {
+	rect := sdl.Rect{0, 0, int32(lg.Width), int32(lg.Height)}
 	lg.surface.FillRect(&rect, 0x00000000)
 }
 
-func (lg *LanderGrapic) RenderMoonSurface() {
+func (lg *LanderGraphic) renderMoonSurface() {
 	surfaceRect := sdl.Rect{0, 590, 800, 10}
 	lg.surface.FillRect(&surfaceRect, 0x7a534500)
 }
 
-func (lg *LanderGrapic) RenderLander() {
+func (lg *LanderGraphic) renderLander() {
 	landerPos := lg.Lander.GetPosition()
-	landerRect := sdl.Rect{10, 10, int32(landerPos.x), int32(landerPos.y)}
+	landerRect := sdl.Rect{10, 10, int32(landerPos.X), int32(landerPos.Y)}
 	lg.surface.FillRect(&landerRect, 0x007a7900)
 }
 
 // func main() {
-// 	landergraphic := LanderGrapic{width: 800, height: 600}
+// 	landergraphic := LanderGraphic{Width: 800, Height: 600}
 // 	landergraphic.start()
 // }
