@@ -65,6 +65,9 @@ func (lg *LanderGraphic) renderMoonSurface() {
 }
 
 func (lg *LanderGraphic) renderLander() {
+	if lg.Lander == nil {
+		return
+	}
 	landerPos := lg.Lander.GetPosition()
 	landerRect := sdl.Rect{10, 10, int32(landerPos.X), int32(landerPos.Y)}
 	lg.surface.FillRect(&landerRect, 0x007a7900)
