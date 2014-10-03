@@ -1,11 +1,30 @@
 package graphic
 
 import (
-	_ "fmt"
+	"fmt"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"github.com/veandco/go-sdl2/sdl"
 	"reflect"
+	"time"
 )
+
+type Timer struct {
+	oldTime int64
+	delta   int64
+}
+
+func (t *Timer) Start() {
+	t.oldTime = time.Now().UnixNano()
+}
+
+func (t *Timer) Update() {
+	current := time.Now().UnixNano()
+	t.delta = current - t.oldTime
+}
+
+func (t *Timer) GetDelta() int64 {
+	return t.delta
+}
 
 type SdlLander interface {
 	GetPosition() simulation.Vector2D
@@ -13,7 +32,7 @@ type SdlLander interface {
 
 type Simulation interface {
 	Start()
-	Update(int64)
+	Update(int64, bool)
 	GetLander() SdlLander
 }
 
@@ -23,11 +42,13 @@ type LanderGraphic struct {
 	Height     int64
 	surface    *sdl.Surface
 	window     *sdl.Window
+	timer      Timer
 	Simulation Simulation
 }
 
 func (lg *LanderGraphic) Start() {
 	lg.run = true
+	lg.timer.Start()
 	if lg.Simulation != nil {
 		lg.Simulation.Start()
 	}
@@ -43,9 +64,11 @@ func (lg *LanderGraphic) end() {
 
 func (lg *LanderGraphic) render() {
 	for lg.run == true {
+		lg.timer.Update()
 		if lg.Simulation != nil {
-			lg.Simulation.Update(100)
+			lg.Simulation.Update(lg.timer.GetDelta(), true)
 		}
+		//fmt.Print(lg.timer.GetDelta())
 		lg.clearSurface()
 		lg.renderMoonSurface()
 		lg.renderLander()
@@ -57,6 +80,8 @@ func (lg *LanderGraphic) render() {
 			switch eventType {
 			case "*sdl.QuitEvent":
 				lg.run = false
+			default:
+				fmt.Println(eventType)
 			}
 		}
 	}
