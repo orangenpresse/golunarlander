@@ -35,7 +35,7 @@ func (simulation *Simulation) Start() {
 	simulation.lander.velocity.X = 0
 	simulation.lander.velocity.Y = 0
 
-	simulation.lander.thrust = 0.0
+	simulation.lander.thrust = 5.0
 }
 
 func (simulation *Simulation) GetLander() *Lander {
@@ -47,14 +47,16 @@ func (lander *Lander) GetPosition() Vector2D {
 }
 
 func (simulation *Simulation) Update(timeDelta int64, thrusterOn bool) {
-
-	var thrust float64 = 0
+	var acceleration float64
 
 	if thrusterOn {
-		thrust = simulation.lander.thrust
+		acceleration += simulation.lander.thrust
 	}
 
-	var acceleration float64 = -G + thrust
+	if simulation.lander.position.Y > 0.0 {
+		acceleration -= G
+	}
+
 	var interval float64 = float64(timeDelta) * 1000000000
 
 	simulation.lander.velocity.Y += acceleration * interval
