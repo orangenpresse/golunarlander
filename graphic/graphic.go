@@ -11,17 +11,26 @@ type SdlLander interface {
 	GetPosition() simulation.Vector2D
 }
 
+type Simulation interface {
+	Start()
+	Update(int64)
+	GetLander() SdlLander
+}
+
 type LanderGraphic struct {
-	run     bool
-	Width   int64
-	Height  int64
-	surface *sdl.Surface
-	window  *sdl.Window
-	Lander  SdlLander
+	run        bool
+	Width      int64
+	Height     int64
+	surface    *sdl.Surface
+	window     *sdl.Window
+	Simulation Simulation
 }
 
 func (lg *LanderGraphic) Start() {
 	lg.run = true
+	if lg.Simulation != nil {
+		lg.Simulation.Start()
+	}
 	lg.window = sdl.CreateWindow("Lunar Lander", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int(lg.Width), int(lg.Height), sdl.WINDOW_SHOWN)
 	lg.surface = lg.window.GetSurface()
 	lg.render()
@@ -34,6 +43,9 @@ func (lg *LanderGraphic) end() {
 
 func (lg *LanderGraphic) render() {
 	for lg.run == true {
+		if lg.Simulation != nil {
+			lg.Simulation.Update(100)
+		}
 		lg.clearSurface()
 		lg.renderMoonSurface()
 		lg.renderLander()
@@ -61,15 +73,10 @@ func (lg *LanderGraphic) renderMoonSurface() {
 }
 
 func (lg *LanderGraphic) renderLander() {
-	if lg.Lander == nil {
+	if lg.Simulation == nil {
 		return
 	}
-	landerPos := lg.Lander.GetPosition()
+	landerPos := lg.Simulation.GetLander().GetPosition()
 	landerRect := sdl.Rect{10, 10, int32(landerPos.X), int32(landerPos.Y)}
 	lg.surface.FillRect(&landerRect, 0x007a7900)
 }
-
-// func main() {
-// 	landergraphic := LanderGraphic{Width: 800, Height: 600}
-// 	landergraphic.start()
-// }
