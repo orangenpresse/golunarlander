@@ -1,7 +1,7 @@
 package graphic
 
 import (
-	"fmt"
+	_ "fmt"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"github.com/veandco/go-sdl2/sdl"
 	"reflect"
@@ -44,15 +44,14 @@ type LanderGraphic struct {
 	surface    *sdl.Surface
 	window     *sdl.Window
 	timer      Timer
-	Simulation Simulation
+	Simulation simulation.Simulation
 }
 
 func (lg *LanderGraphic) Start() {
 	lg.run = true
 	lg.timer.Start()
-	if lg.Simulation != nil {
-		lg.Simulation.Start()
-	}
+	lg.Simulation = simulation.Simulation{}
+	lg.Simulation.Start()
 	lg.window = sdl.CreateWindow("Lunar Lander", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int(lg.Width), int(lg.Height), sdl.WINDOW_SHOWN)
 	lg.surface = lg.window.GetSurface()
 	lg.render()
@@ -67,9 +66,7 @@ func (lg *LanderGraphic) render() {
 	for lg.run == true {
 		lg.timer.Update()
 		lg.handleEvents()
-		if lg.Simulation != nil {
-			lg.Simulation.Update(lg.timer.GetDelta(), true)
-		}
+		lg.Simulation.Update(lg.timer.GetDelta(), true)
 		lg.clearSurface()
 		lg.renderMoonSurface()
 		lg.renderLander()
@@ -109,14 +106,13 @@ func (lg *LanderGraphic) clearSurface() {
 
 func (lg *LanderGraphic) renderMoonSurface() {
 	surfaceRect := sdl.Rect{0, 590, 800, 10}
-	lg.surface.FillRect(&surfaceRect, 0x7a534500)
+	lg.surface.FillRect(&surfaceRect, 0x007a5345)
 }
 
 func (lg *LanderGraphic) renderLander() {
-	if lg.Simulation == nil {
-		return
-	}
 	landerPos := lg.Simulation.GetLander().GetPosition()
-	landerRect := sdl.Rect{10, 10, int32(landerPos.X), int32(landerPos.Y)}
-	lg.surface.FillRect(&landerRect, 0x007a7900)
+	//fmt.Println(landerPos)
+	//landerRect := sdl.Rect{10, 10, int32(landerPos.X), int32(800.0 - landerPos.Y)}
+	landerRect := sdl.Rect{int32(landerPos.X), int32(600.0 - landerPos.Y), 10, 15}
+	lg.surface.FillRect(&landerRect, 0x00007a79)
 }
