@@ -1,4 +1,4 @@
-package main
+package graphic
 
 import (
 	_ "fmt"
@@ -74,7 +74,7 @@ func (lg *LanderGrapic) RenderLander() {
 	lg.surface.FillRect(&landerRect, 0x007a7900)
 }
 
-func main() {
-	landergraphic := LanderGrapic{width: 800, height: 600}
-	landergraphic.start()
-}
+// func main() {
+// 	landergraphic := LanderGrapic{width: 800, height: 600}
+// 	landergraphic.start()
+// }
