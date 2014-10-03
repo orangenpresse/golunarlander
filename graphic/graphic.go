@@ -1,7 +1,7 @@
 package graphic
 
 import (
-	_ "fmt"
+	//"fmt"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"github.com/veandco/go-sdl2/sdl"
 	"reflect"
@@ -66,7 +66,7 @@ func (lg *LanderGraphic) render() {
 	for lg.run == true {
 		lg.timer.Update()
 		lg.handleEvents()
-		lg.Simulation.Update(lg.timer.GetDelta(), true)
+		lg.Simulation.Update(lg.timer.GetDelta(), lg.thrust)
 		lg.clearSurface()
 		lg.renderMoonSurface()
 		lg.renderLander()
@@ -111,8 +111,14 @@ func (lg *LanderGraphic) renderMoonSurface() {
 
 func (lg *LanderGraphic) renderLander() {
 	landerPos := lg.Simulation.GetLander().GetPosition()
-	//fmt.Println(landerPos)
-	//landerRect := sdl.Rect{10, 10, int32(landerPos.X), int32(800.0 - landerPos.Y)}
-	landerRect := sdl.Rect{int32(landerPos.X), int32(600.0 - landerPos.Y), 10, 15}
+	posX := int32(landerPos.X)
+	posY := int32(lg.Height) - int32(landerPos.Y)
+
+	landerRect := sdl.Rect{posX, posY, 10, 15}
 	lg.surface.FillRect(&landerRect, 0x00007a79)
+
+	if lg.thrust {
+		thrusterRect := sdl.Rect{posX, posY + 16, 10, 3}
+		lg.surface.FillRect(&thrusterRect, 0x00ff0000)
+	}
 }
