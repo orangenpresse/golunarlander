@@ -47,7 +47,7 @@ func (lander *Lander) GetPosition() Vector2D {
 }
 
 func (simulation *Simulation) Update(timeDelta int64, thrusterOn bool) {
-	var acceleration float64
+	var acceleration float64 = 0
 
 	if thrusterOn {
 		acceleration += simulation.lander.thrust
@@ -55,9 +55,11 @@ func (simulation *Simulation) Update(timeDelta int64, thrusterOn bool) {
 
 	if simulation.lander.position.Y > 0.0 {
 		acceleration -= G
+	} else {
+		simulation.lander.velocity.Y = 0.0
 	}
 
-	var interval float64 = float64(timeDelta) * 1000000000
+	var interval float64 = float64(timeDelta) / 1000000000
 
 	simulation.lander.velocity.Y += acceleration * interval
 	simulation.lander.position.Y += simulation.lander.velocity.Y * interval
