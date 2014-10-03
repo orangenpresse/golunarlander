@@ -38,6 +38,7 @@ type Simulation interface {
 
 type LanderGraphic struct {
 	run        bool
+	thrust     bool
 	Width      int64
 	Height     int64
 	surface    *sdl.Surface
@@ -65,25 +66,39 @@ func (lg *LanderGraphic) end() {
 func (lg *LanderGraphic) render() {
 	for lg.run == true {
 		lg.timer.Update()
+		lg.handleEvents()
 		if lg.Simulation != nil {
 			lg.Simulation.Update(lg.timer.GetDelta(), true)
 		}
-		//fmt.Print(lg.timer.GetDelta())
 		lg.clearSurface()
 		lg.renderMoonSurface()
 		lg.renderLander()
 		lg.window.UpdateSurface()
 
-		event := sdl.PollEvent()
-		if event != nil {
-			eventType := reflect.TypeOf(event).String()
-			switch eventType {
-			case "*sdl.QuitEvent":
-				lg.run = false
-			default:
-				fmt.Println(eventType)
+	}
+}
+
+func (lg *LanderGraphic) handleEvents() {
+	event := sdl.PollEvent()
+	if event != nil {
+
+		eventType := reflect.TypeOf(event).String()
+		switch eventType {
+
+		case "*sdl.QuitEvent":
+			lg.run = false
+
+		case "*sdl.KeyDownEvent":
+			if ev, _ := event.(*sdl.KeyDownEvent); ev.Keysym.Scancode == 82 {
+				lg.thrust = true
+			}
+
+		case "*sdl.KeyUpEvent":
+			if ev, _ := event.(*sdl.KeyUpEvent); ev.Keysym.Scancode == 82 {
+				lg.thrust = false
 			}
 		}
+
 	}
 }
 
