@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	"fmt"
+	_ "fmt"
 	_ "math"
 	_ "time"
 )
@@ -23,10 +23,46 @@ type Lander struct {
 	thrust   float64
 }
 
+type Simulation struct {
+	lander *Lander
+}
+
+func (simulation *Simulation) Start() {
+	simulation.lander = new(Lander)
+	simulation.lander.position.X = 0
+	simulation.lander.position.Y = 10000
+
+	simulation.lander.velocity.X = 0
+	simulation.lander.velocity.Y = 0
+
+	simulation.lander.thrust = 0.0
+}
+
+func (simulation *Simulation) GetLander() *Lander {
+	return simulation.lander
+}
+
 func (lander *Lander) GetPosition() Vector2D {
 	return lander.position
 }
 
+func (simulation *Simulation) Update(timeDelta int64, thrusterOn bool) {
+
+	var thrust float64 = 0
+
+	if thrusterOn {
+		thrust = simulation.lander.thrust
+	}
+
+	var acceleration float64 = -G + thrust
+	var interval float64 = float64(timeDelta) * 1000000000
+
+	simulation.lander.velocity.Y += acceleration * interval
+	simulation.lander.position.Y += simulation.lander.velocity.Y * interval
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/*
 func physic(lander *Lander, channel chan int64) {
 	for ; currentTime <= endTime; currentTime += int64(interval * 1000) {
 
@@ -59,7 +95,7 @@ func control(lander *Lander, channel chan int64) {
 }
 
 var currentTime int64 = 0
-
+*/
 // func main() {
 // 	lander := new(Lander)
 
