@@ -15,7 +15,7 @@ const (
 	G              = 1.635
 	interval       = 0.001
 	endTime        = 200000
-	slownessFactor = 100
+	slownessFactor = 0.1
 )
 
 type Lander struct {
@@ -58,6 +58,7 @@ func (simulation *Simulation) Update(timeDelta int64, thrusterOn bool) {
 		acceleration -= G
 	} else {
 		simulation.lander.velocity.Y = 0.0
+		simulation.lander.position.Y = 0.0
 	}
 
 	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)

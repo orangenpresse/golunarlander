@@ -1,9 +1,9 @@
 package graphic
 
 import (
-	//"fmt"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"github.com/veandco/go-sdl2/sdl"
+	_ "github.com/veandco/go-sdl2/sdl_ttf"
 	"reflect"
 	"time"
 )
@@ -20,6 +20,7 @@ func (t *Timer) Start() {
 func (t *Timer) Update() {
 	current := time.Now().UnixNano()
 	t.delta = current - t.oldTime
+	t.oldTime = current
 }
 
 func (t *Timer) GetDelta() int64 {
@@ -112,10 +113,12 @@ func (lg *LanderGraphic) renderMoonSurface() {
 func (lg *LanderGraphic) renderLander() {
 	landerPos := lg.Simulation.GetLander().GetPosition()
 	posX := int32(landerPos.X)
-	posY := int32(lg.Height) - int32(landerPos.Y)
+	posY := int32(lg.Height-25) - int32(landerPos.Y)
 
 	landerRect := sdl.Rect{posX, posY, 10, 15}
 	lg.surface.FillRect(&landerRect, 0x00007a79)
+
+	//ttf.RenderText_Solid("meep", 0x00ff0000)
 
 	if lg.thrust {
 		thrusterRect := sdl.Rect{posX, posY + 16, 10, 3}
