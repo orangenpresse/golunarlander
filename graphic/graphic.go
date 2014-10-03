@@ -121,7 +121,7 @@ func (lg *LanderGraphic) renderLander() {
 	//ttf.RenderText_Solid("meep", 0x00ff0000)
 
 	if lg.thrust {
-		thrusterRect := sdl.Rect{posX, posY + 16, 10, 3}
+		thrusterRect := sdl.Rect{posX + 3, posY + 16, 5, 3}
 		lg.surface.FillRect(&thrusterRect, 0x00ff0000)
 	}
 }
