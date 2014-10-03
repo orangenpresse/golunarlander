@@ -2,17 +2,13 @@ package graphic
 
 import (
 	_ "fmt"
+	"github.com/orangenpresse/golunarlander/simulation"
 	"github.com/veandco/go-sdl2/sdl"
 	"reflect"
 )
 
-type Vector2D struct {
-	X float64
-	Y float64
-}
-
 type SdlLander interface {
-	GetPosition() Vector2D
+	GetPosition() simulation.Vector2D
 }
 
 type LanderGraphic struct {
