@@ -12,9 +12,10 @@ type Vector2D struct {
 }
 
 const (
-	G        = 1.635
-	interval = 0.001
-	endTime  = 200000
+	G              = 1.635
+	interval       = 0.001
+	endTime        = 200000
+	slownessFactor = 100
 )
 
 type Lander struct {
@@ -29,8 +30,8 @@ type Simulation struct {
 
 func (simulation *Simulation) Start() {
 	simulation.lander = new(Lander)
-	simulation.lander.position.X = 0
-	simulation.lander.position.Y = 10000
+	simulation.lander.position.X = 400
+	simulation.lander.position.Y = 600
 
 	simulation.lander.velocity.X = 0
 	simulation.lander.velocity.Y = 0
@@ -59,7 +60,7 @@ func (simulation *Simulation) Update(timeDelta int64, thrusterOn bool) {
 		simulation.lander.velocity.Y = 0.0
 	}
 
-	var interval float64 = float64(timeDelta) / 1000000000
+	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 
 	simulation.lander.velocity.Y += acceleration * interval
 	simulation.lander.position.Y += simulation.lander.velocity.Y * interval
