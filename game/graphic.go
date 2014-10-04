@@ -25,14 +25,14 @@ func (lg *LunarLander) drawHud() {
 	bg := sdl.Rect{int32(5), int32(posY), 20, 110}
 	lg.surface.FillRect(&bg, 0x00878b88)
 
-	lg.drawFuelBar()
+	lg.drawFuelBar(posY)
 }
 
-func (lg *LunarLander) drawFuelBar() {
+func (lg *LunarLander) drawFuelBar(posY int64) {
 	fuelBorder := sdl.Rect{int32(8), int32(posY + 3), 14, 104}
 	lg.surface.FillRect(&fuelBorder, 0x00c3c9c4)
 
-	fuel := lg.Simulation.Lander.GetLanderState().fuel
+	fuel := int32(lg.Simulation.GetLander().GetLanderState().Fuel)
 
 	fuelBar := sdl.Rect{int32(10), (100 - fuel) + int32(posY+5), 10, fuel}
 	lg.surface.FillRect(&fuelBar, 0x0000de3c)

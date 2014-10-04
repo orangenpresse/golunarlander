@@ -6,17 +6,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type SdlLander interface {
-	GetPosition() simulation.Vector2D
-	//GetLanderState() simulation.LanderState
-}
-
-type Simulation interface {
-	Start()
-	Update(int64, bool)
-	GetLander() SdlLander
-}
-
 type LunarLander struct {
 	run        bool
 	thrust     bool
