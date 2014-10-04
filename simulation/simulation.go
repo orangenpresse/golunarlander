@@ -19,7 +19,7 @@ type Simulation struct {
 
 func (simulation *Simulation) Start() {
 	simulation.lander = new(Lander)
-	simulation.lander.velocity.X = 400
+	simulation.lander.position.X = 400
 	simulation.lander.position.Y = 600
 
 	simulation.lander.state.Fuel = 100
