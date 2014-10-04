@@ -1,6 +1,9 @@
 package game
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"fmt"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 func (lg *LunarLander) render() {
 	lg.clearSurface()
@@ -32,7 +35,7 @@ func (lg *LunarLander) drawFuelBar(posY int64) {
 	fuelBorder := sdl.Rect{int32(8), int32(posY + 3), 14, 104}
 	lg.surface.FillRect(&fuelBorder, 0x00c3c9c4)
 
-	fuel := int32(lg.Simulation.GetLander().GetLanderState().Fuel)
+	fuel := int32(lg.Simulation.GetLander().GetLanderState().GetFuelLevel())
 
 	fuelBar := sdl.Rect{int32(10), (100 - fuel) + int32(posY+5), 10, fuel}
 	lg.surface.FillRect(&fuelBar, 0x0000de3c)
@@ -46,8 +49,23 @@ func (lg *LunarLander) drawLander() {
 	landerRect := sdl.Rect{posX, posY, 10, 15}
 	lg.surface.FillRect(&landerRect, 0x00007a79)
 
+	lg.drawThrust(posX, posY)
+	lg.drawExploded(posX, posY)
+}
+
+func (lg *LunarLander) drawThrust(posX int32, posY int32) {
 	if lg.thrust {
 		thrusterRect := sdl.Rect{posX + 3, posY + 16, 5, 3}
 		lg.surface.FillRect(&thrusterRect, 0x00ff0000)
 	}
+}
+
+func (lg *LunarLander) drawExploded(posX int32, posY int32) {
+	//if lg.Simulation.GetLander().GetLanderState().Exploded {
+	for x, y := 0, 0; x < 3; {
+		x++
+		y++
+		fmt.Println(x, y)
+	}
+	//}
 }
