@@ -1,11 +1,20 @@
 package graphic
 
 import (
+	_ "fmt"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"github.com/veandco/go-sdl2/sdl"
-	_ "github.com/veandco/go-sdl2/sdl_ttf"
 	"reflect"
 	"time"
+)
+
+const (
+	KEY_UP    = 82
+	KEY_DOWN  = 81
+	KEY_LEFT  = 80
+	KEY_RIGHT = 79
+	KEY_R     = 21
+	KEY_ESC   = 41
 )
 
 type Timer struct {
@@ -71,28 +80,38 @@ func (lg *LanderGraphic) render() {
 		lg.clearSurface()
 		lg.renderMoonSurface()
 		lg.renderLander()
+		lg.drawHud()
 		lg.window.UpdateSurface()
-
 	}
 }
 
 func (lg *LanderGraphic) handleEvents() {
 	event := sdl.PollEvent()
 	if event != nil {
-
 		eventType := reflect.TypeOf(event).String()
+
 		switch eventType {
 
 		case "*sdl.QuitEvent":
 			lg.run = false
 
 		case "*sdl.KeyDownEvent":
-			if ev, _ := event.(*sdl.KeyDownEvent); ev.Keysym.Scancode == 82 {
+			ev, _ := event.(*sdl.KeyDownEvent)
+
+			//fmt.Println(ev.Keysym.Scancode)
+
+			if ev.Keysym.Scancode == KEY_ESC {
+				lg.run = false
+			}
+			if ev.Keysym.Scancode == KEY_UP {
 				lg.thrust = true
+			}
+			if ev.Keysym.Scancode == KEY_R {
+				lg.Simulation.Start()
 			}
 
 		case "*sdl.KeyUpEvent":
-			if ev, _ := event.(*sdl.KeyUpEvent); ev.Keysym.Scancode == 82 {
+			if ev, _ := event.(*sdl.KeyUpEvent); ev.Keysym.Scancode == KEY_UP {
 				lg.thrust = false
 			}
 		}
@@ -110,6 +129,21 @@ func (lg *LanderGraphic) renderMoonSurface() {
 	lg.surface.FillRect(&surfaceRect, 0x007a5345)
 }
 
+func (lg *LanderGraphic) drawHud() {
+	posY := lg.Height - 125
+
+	bg := sdl.Rect{int32(5), int32(posY), 20, 110}
+	lg.surface.FillRect(&bg, 0x00878b88)
+
+	fuelBorder := sdl.Rect{int32(8), int32(posY + 3), 14, 104}
+	lg.surface.FillRect(&fuelBorder, 0x00c3c9c4)
+
+	var fuel int32 = 50
+
+	fuelBar := sdl.Rect{int32(10), (100 - fuel) + int32(posY+5), 10, fuel}
+	lg.surface.FillRect(&fuelBar, 0x0000de3c)
+}
+
 func (lg *LanderGraphic) renderLander() {
 	landerPos := lg.Simulation.GetLander().GetPosition()
 	posX := int32(landerPos.X)
@@ -117,8 +151,6 @@ func (lg *LanderGraphic) renderLander() {
 
 	landerRect := sdl.Rect{posX, posY, 10, 15}
 	lg.surface.FillRect(&landerRect, 0x00007a79)
-
-	//ttf.RenderText_Solid("meep", 0x00ff0000)
 
 	if lg.thrust {
 		thrusterRect := sdl.Rect{posX + 3, posY + 16, 5, 3}
