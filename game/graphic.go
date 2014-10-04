@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 	gl "github.com/go-gl/gl"
+	"github.com/go-gl/mathgl/mgl32"
+	"github.com/orangenpresse/golunarlander/simulation"
 	"io/ioutil"
 )
 
@@ -14,11 +16,14 @@ type Graphic struct {
 	fragment_shader   gl.Shader
 	frameBufferHeight int
 	frameBufferWidht  int
+	program           gl.Program
+	Lander            *simulation.Lander
 }
 
 func (lg *LunarLander) initGraphics() {
 	g := Graphic{}
 	lg.Graphic = &g
+	g.Lander = lg.Simulation.GetLander()
 
 	g.frameBufferWidht, g.frameBufferHeight = lg.window.GetFramebufferSize()
 
@@ -26,13 +31,13 @@ func (lg *LunarLander) initGraphics() {
 	g.initBuffers()
 	g.compileShaders()
 	verticies := []float32{
-		0, 1, 0,
 		-1, -1, 0,
 		1, -1, 0,
-		0, -1, 0,
+		-1, 1, 0,
+		-1, 1, 0,
 		1, 1, 0,
-		-1, 1, 0}
-	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*6, verticies, gl.STATIC_DRAW)
+		1, -1, 0}
+	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*4, verticies, gl.STATIC_DRAW)
 }
 
 func (g *Graphic) initBuffers() {
@@ -50,7 +55,9 @@ func (g *Graphic) compileShaders() {
 		g.vertex_shader = gl.CreateShader(gl.VERTEX_SHADER)
 		g.vertex_shader.Source(string(data))
 		g.vertex_shader.Compile()
-		fmt.Println(g.vertex_shader.GetInfoLog())
+		if info := g.vertex_shader.GetInfoLog(); info != "" {
+			fmt.Println(info)
+		}
 	}
 
 	if data, err := ioutil.ReadFile("./game/shader/fragmentShader.glsl"); err != nil {
@@ -59,21 +66,31 @@ func (g *Graphic) compileShaders() {
 		g.fragment_shader = gl.CreateShader(gl.FRAGMENT_SHADER)
 		g.fragment_shader.Source(string(data))
 		g.fragment_shader.Compile()
-		fmt.Println(g.fragment_shader.GetInfoLog())
+		if info := g.fragment_shader.GetInfoLog(); info != "" {
+			fmt.Println(info)
+		}
 	}
+
+	g.program = gl.CreateProgram()
+	g.program.AttachShader(g.vertex_shader)
+	g.program.AttachShader(g.fragment_shader)
+	g.program.Link()
+	g.program.Use()
 
 }
 
 func (g *Graphic) end() {
 	g.fragment_shader.Delete()
 	g.vertex_shader.Delete()
+	g.program.Delete()
 }
 
 func (g *Graphic) render() {
 	g.clear()
+	g.setPerspectiveAndCamera()
 	g.drawMoonSurface()
-	// lg.drawLander()
-	// lg.drawHud()
+	g.drawLander()
+	// g.drawHud()
 
 }
 
@@ -81,27 +98,44 @@ func (g *Graphic) clear() {
 	gl.Viewport(0, 0, g.frameBufferWidht, g.frameBufferHeight)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
+
+}
+
+func (g *Graphic) setPerspectiveAndCamera() {
+	projection := mgl32.Perspective(70.0, float32(800)/600, 0.1, 10.0)
+	projectionUniform := g.program.GetUniformLocation("projection")
+	projectionUniform.UniformMatrix4fv(false, [16]float32(projection))
+
+	camera := mgl32.LookAtV(mgl32.Vec3{0, 0, 5}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	cameraUniform := g.program.GetUniformLocation("camera")
+	cameraUniform.UniformMatrix4fv(false, [16]float32(camera))
 }
 
 func (g *Graphic) drawMoonSurface() {
-	program := gl.CreateProgram()
-	program.AttachShader(g.vertex_shader)
-	program.AttachShader(g.fragment_shader)
+	model := mgl32.Ident4()
 
-	program.BindFragDataLocation(0, "outColor")
-	program.Link()
-	program.Use()
-	defer program.Delete()
+	translationMatrix := mgl32.Translate3D(0.0, -8.2, 0.0)
+	model = translationMatrix.Mul4(model)
 
-	positionAttrib := program.GetAttribLocation("position")
+	rotMatrix := mgl32.HomogRotate3D(0.0, mgl32.Vec3{0, 0, 1})
+	model = rotMatrix.Mul4(model)
+
+	scaleMatrix := mgl32.Scale3D(10.0, 0.3, 1)
+	model = scaleMatrix.Mul4(model)
+
+	modelUniform := g.program.GetUniformLocation("model")
+	modelUniform.UniformMatrix4fv(false, [16]float32(model))
+
+	positionAttrib := g.program.GetAttribLocation("position")
 	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
 	positionAttrib.EnableArray()
 	defer positionAttrib.DisableArray()
 
-	gl.DrawArrays(gl.TRIANGLES, 0, 3)
+	color := g.program.GetUniformLocation("color")
+	color.Uniform4fv(1, []float32{0.7, 0.5, 0, 0})
+	g.program.BindFragDataLocation(0, "outColor")
 
-	// surfaceRect := sdl.Rect{0, 590, 800, 10}
-	// lg.surface.FillRect(&surfaceRect, 0x007a5345)
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 }
 
 // func (lg *Graphic) drawHud() {
@@ -123,24 +157,57 @@ func (g *Graphic) drawMoonSurface() {
 // 	lg.surface.FillRect(&fuelBar, 0x0000de3c)
 // }
 
-// func (lg *Graphic) drawLander() {
-// 	landerPos := lg.Simulation.GetLander().GetPosition()
-// 	posX := int32(landerPos.X)
-// 	posY := int32(lg.Height-25) - int32(landerPos.Y)
+func (g *Graphic) drawLander() {
+	landerPos := g.Lander.GetPosition()
+	posY := landerPos.Y/10 - 35
+	posX := 0
 
-// 	landerRect := sdl.Rect{posX, posY, 10, 15}
-// 	lg.surface.FillRect(&landerRect, 0x00007a79)
+	model := mgl32.Ident4()
 
-// 	lg.drawThrust(posX, posY)
-// 	lg.drawExploded(posX, posY)
-// }
+	translationMatrix := mgl32.Translate3D(float32(posX), float32(posY), 0.0)
+	model = translationMatrix.Mul4(model)
 
-// func (lg *Graphic) drawThrust(posX int32, posY int32) {
-// 	if lg.Simulation.GetLander().IsThrusting() {
-// 		thrusterRect := sdl.Rect{posX + 3, posY + 16, 5, 3}
-// 		lg.surface.FillRect(&thrusterRect, 0x00ff0000)
-// 	}
-// }
+	rotMatrix := mgl32.HomogRotate3D(0.0, mgl32.Vec3{0, 0, 1})
+	model = rotMatrix.Mul4(model)
+
+	scaleMatrix := mgl32.Scale3D(0.04, 0.06, 1)
+	model = scaleMatrix.Mul4(model)
+
+	modelUniform := g.program.GetUniformLocation("model")
+	modelUniform.UniformMatrix4fv(false, [16]float32(model))
+
+	positionAttrib := g.program.GetAttribLocation("position")
+	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
+	positionAttrib.EnableArray()
+	defer positionAttrib.DisableArray()
+
+	color := g.program.GetUniformLocation("color")
+	color.Uniform4fv(1, []float32{0.7, 0.5, 1, 0})
+	g.program.BindFragDataLocation(0, "outColor")
+
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+
+	g.drawThrust(model)
+
+	// lg.drawExploded(posX, posY)
+}
+
+func (g *Graphic) drawThrust(model mgl32.Mat4) {
+	if g.Lander.IsThrusting() {
+
+		translationMatrix := mgl32.Translate3D(0.0, -0.1, 0.0)
+		model = translationMatrix.Mul4(model)
+
+		modelUniform := g.program.GetUniformLocation("model")
+		modelUniform.UniformMatrix4fv(false, [16]float32(model))
+
+		color := g.program.GetUniformLocation("color")
+		color.Uniform4fv(1, []float32{1, 0, 0, 0})
+		g.program.BindFragDataLocation(0, "outColor")
+
+		gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	}
+}
 
 // func (lg *Graphic) drawExploded(posX int32, posY int32) {
 // 	if lg.Simulation.GetLander().IsExploded() {
