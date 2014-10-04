@@ -18,52 +18,33 @@ type Simulation struct {
 }
 
 func (simulation *Simulation) Start() {
-	simulation.lander = new(Lander)
-	simulation.lander.position.X = 400
-	simulation.lander.position.Y = 600
-
-	simulation.lander.state.Fuel = 100
-	simulation.lander.state.Exploded = false
-
-	simulation.lander.velocity.X = 0
-	simulation.lander.velocity.Y = 0
-
-	simulation.lander.thrust = 5.0
-	simulation.lander.crashTolerance = 2.0
+	simulation.lander = New()
 }
 
 func (simulation *Simulation) GetLander() *Lander {
 	return simulation.lander
 }
 
-func (lander *Lander) GetPosition() Vector2D {
-	return lander.position
-}
-
-func (lander *Lander) GetLanderState() LanderState {
-	return lander.state
-}
-
 func (simulation *Simulation) Update(timeDelta int64, TrusterOn bool) {
+	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 	var acceleration float64 = 0
 
-	if TrusterOn {
-		acceleration += simulation.lander.thrust
+	if TrusterOn && simulation.lander.tank.Level > 0.0 {
+		acceleration += simulation.lander.thruster.Acceleration
+		simulation.lander.tank.Level -= simulation.lander.thruster.FuelConsumption * interval
 	}
 
 	if simulation.lander.position.Y > 0.0 {
 		acceleration -= G
 	} else {
 		if simulation.lander.velocity.Y > simulation.lander.crashTolerance {
-			simulation.lander.state.Exploded = true
-			simulation.lander.state.Fuel = 0
+			simulation.lander.exploded = true
+			simulation.lander.tank.Level = 0
 		}
 
 		simulation.lander.velocity.Y = 0.0
 		simulation.lander.position.Y = 0.0
 	}
-
-	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 
 	simulation.lander.velocity.Y += acceleration * interval
 	simulation.lander.position.Y += simulation.lander.velocity.Y * interval
