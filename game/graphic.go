@@ -4,8 +4,8 @@ import "github.com/veandco/go-sdl2/sdl"
 
 func (lg *LunarLander) render() {
 	lg.clearSurface()
-	lg.renderMoonSurface()
-	lg.renderLander()
+	lg.drawMoonSurface()
+	lg.drawLander()
 	lg.drawHud()
 }
 
@@ -14,7 +14,7 @@ func (lg *LunarLander) clearSurface() {
 	lg.surface.FillRect(&rect, 0x00000000)
 }
 
-func (lg *LunarLander) renderMoonSurface() {
+func (lg *LunarLander) drawMoonSurface() {
 	surfaceRect := sdl.Rect{0, 590, 800, 10}
 	lg.surface.FillRect(&surfaceRect, 0x007a5345)
 }
@@ -25,6 +25,10 @@ func (lg *LunarLander) drawHud() {
 	bg := sdl.Rect{int32(5), int32(posY), 20, 110}
 	lg.surface.FillRect(&bg, 0x00878b88)
 
+	lg.drawFuelBar()
+}
+
+func (lg *LunarLander) drawFuelBar() {
 	fuelBorder := sdl.Rect{int32(8), int32(posY + 3), 14, 104}
 	lg.surface.FillRect(&fuelBorder, 0x00c3c9c4)
 
@@ -34,7 +38,7 @@ func (lg *LunarLander) drawHud() {
 	lg.surface.FillRect(&fuelBar, 0x0000de3c)
 }
 
-func (lg *LunarLander) renderLander() {
+func (lg *LunarLander) drawLander() {
 	landerPos := lg.Simulation.GetLander().GetPosition()
 	posX := int32(landerPos.X)
 	posY := int32(lg.Height-25) - int32(landerPos.Y)
