@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/orangenpresse/golunarlander/graphic"
+	"github.com/orangenpresse/golunarlander/game"
 )
 
 func main() {
-	game := graphic.LanderGraphic{Width: 800, Height: 600}
+	game := game.LunarLander{Width: 800, Height: 600}
 	game.Start()
 }
