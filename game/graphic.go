@@ -53,7 +53,7 @@ func (lg *LunarLander) drawLander() {
 }
 
 func (lg *LunarLander) drawThrust(posX int32, posY int32) {
-	if lg.thrust {
+	if lg.Simulation.GetLander().IsThrusting() {
 		thrusterRect := sdl.Rect{posX + 3, posY + 16, 5, 3}
 		lg.surface.FillRect(&thrusterRect, 0x00ff0000)
 	}
@@ -61,7 +61,7 @@ func (lg *LunarLander) drawThrust(posX int32, posY int32) {
 
 func (lg *LunarLander) drawExploded(posX int32, posY int32) {
 	if lg.Simulation.GetLander().IsExploded() {
-		p1x, p1y, p2x, p2y := 0, 0, 20, 20
+		p1x, p1y, p2x, p2y := 0, 0, int(lg.Width), int(lg.Height)
 
 		renderer := lg.window.GetRenderer()
 		renderer.SetDrawColor(255, 128, 0, 0)
