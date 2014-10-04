@@ -42,6 +42,10 @@ func (lander *Lander) Thrust(on bool) {
 	lander.thruster.Thrusting = on && lander.tank.Level > 0.0
 }
 
+func (lander *Lander) IsThrusting() bool {
+	return lander.thruster.Thrusting
+}
+
 func New() *Lander {
 	lander := new(Lander)
 
