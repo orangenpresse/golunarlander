@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -35,8 +34,8 @@ func (lg *LunarLander) drawFuelBar(posY int64) {
 	fuelBorder := sdl.Rect{int32(8), int32(posY + 3), 14, 104}
 	lg.surface.FillRect(&fuelBorder, 0x00c3c9c4)
 
-	fuel := int32(lg.Simulation.GetLander().GetLanderState().GetFuelLevel())
-
+	//fuel := int32(lg.Simulation.GetLander().GetLanderState().GetFuelLevel())
+	fuel := int32(100)
 	fuelBar := sdl.Rect{int32(10), (100 - fuel) + int32(posY+5), 10, fuel}
 	lg.surface.FillRect(&fuelBar, 0x0000de3c)
 }
@@ -63,9 +62,18 @@ func (lg *LunarLander) drawThrust(posX int32, posY int32) {
 func (lg *LunarLander) drawExploded(posX int32, posY int32) {
 	//if lg.Simulation.GetLander().GetLanderState().Exploded {
 	for x, y := 0, 0; x < 3; {
+		p1x := x
+		p1y := y
+		p2x := 100 - x
+		p2y := 100 - y
+
+		renderer := lg.window.GetRenderer()
+		renderer.SetDrawColor(0, 255, 0, 0)
+		renderer.DrawLine(p1x, p1y, p2x, p2y)
+		renderer.DrawLine(0, 0, 100, 100)
 		x++
 		y++
-		fmt.Println(x, y)
+		//fmt.Println(x, y)
 	}
 	//}
 }
