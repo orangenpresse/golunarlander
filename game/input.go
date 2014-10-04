@@ -1,49 +1,22 @@
 package game
 
 import (
-	"github.com/veandco/go-sdl2/sdl"
-	"reflect"
+	glfw "github.com/go-gl/glfw3"
 )
 
-const (
-	KEY_UP    = 82
-	KEY_DOWN  = 81
-	KEY_LEFT  = 80
-	KEY_RIGHT = 79
-	KEY_R     = 21
-	KEY_ESC   = 41
-)
+func (lg *LunarLander) handleEvents(w *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
+	if key == glfw.KeyEscape && action == glfw.Press {
+		lg.run = false
+	}
 
-func (lg *LunarLander) handleEvents() {
-	event := sdl.PollEvent()
-	if event != nil {
-		eventType := reflect.TypeOf(event).String()
+	if key == glfw.KeyUp && action == glfw.Press {
+		lg.thrust = true
+	} else if key == glfw.KeyUp && action == glfw.Release {
+		lg.thrust = false
+	}
 
-		switch eventType {
-
-		case "*sdl.QuitEvent":
-			lg.run = false
-
-		case "*sdl.KeyDownEvent":
-			ev, _ := event.(*sdl.KeyDownEvent)
-
-			//fmt.Println(ev.Keysym.Scancode)
-
-			if ev.Keysym.Scancode == KEY_ESC {
-				lg.run = false
-			}
-			if ev.Keysym.Scancode == KEY_UP {
-				lg.thrust = true
-			}
-			if ev.Keysym.Scancode == KEY_R {
-				lg.Simulation.Start()
-			}
-
-		case "*sdl.KeyUpEvent":
-			if ev, _ := event.(*sdl.KeyUpEvent); ev.Keysym.Scancode == KEY_UP {
-				lg.thrust = false
-			}
-		}
-
+	if key == glfw.KeyR {
+		lg.Simulation.Start()
+		lg.Graphic.Lander = lg.Simulation.GetLander()
 	}
 }

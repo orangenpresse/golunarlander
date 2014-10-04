@@ -1,43 +1,79 @@
 package game
 
 import (
-	_ "fmt"
+	"fmt"
+	glfw "github.com/go-gl/glfw3"
 	"github.com/orangenpresse/golunarlander/simulation"
-	"github.com/veandco/go-sdl2/sdl"
+	"runtime"
 )
 
 type LunarLander struct {
 	run        bool
 	thrust     bool
-	Width      int64
-	Height     int64
-	surface    *sdl.Surface
-	window     *sdl.Window
+	Width      int
+	Height     int
 	timer      Timer
+	window     *glfw.Window
 	Simulation simulation.Simulation
+	Graphic    *Graphic
+}
+
+func (lg *LunarLander) CreateWindow() {
+	runtime.LockOSThread()
+
+	glfw.SetErrorCallback(lg.handleErrors)
+
+	glfw.Init()
+	glfw.WindowHint(glfw.ContextVersionMajor, 3)
+	glfw.WindowHint(glfw.ContextVersionMinor, 3)
+	glfw.WindowHint(glfw.OpenglForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.OpenglProfile, glfw.OpenglCoreProfile)
+
+	window, err := glfw.CreateWindow(lg.Width, lg.Height, "Lunar Lander", nil, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	window.MakeContextCurrent()
+	window.SetCloseCallback(func(window *glfw.Window) {
+		lg.run = false
+	})
+
+	// use vsync
+	glfw.SwapInterval(1)
+
+	lg.window = window
+}
+
+func (lg *LunarLander) handleErrors(err glfw.ErrorCode, msg string) {
+	fmt.Printf("GLFW ERROR: %v: %v\n", err, msg)
 }
 
 func (lg *LunarLander) Start() {
+	lg.CreateWindow()
 	lg.run = true
+	lg.window.SetKeyCallback(lg.handleEvents)
 	lg.timer.Start()
 	lg.Simulation = simulation.Simulation{}
 	lg.Simulation.Start()
-	lg.window = sdl.CreateWindow("Lunar Lander", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int(lg.Width), int(lg.Height), sdl.WINDOW_SHOWN)
-	lg.surface = lg.window.GetSurface()
+	lg.initGraphics()
 	lg.mainLoop()
 	lg.end()
 }
 
 func (lg *LunarLander) end() {
+	lg.Graphic.end()
+	lg.window.SetShouldClose(true)
 	lg.window.Destroy()
+	glfw.Terminate()
 }
 
 func (lg *LunarLander) mainLoop() {
 	for lg.run == true {
 		lg.timer.Update()
-		lg.handleEvents()
+		glfw.PollEvents()
 		lg.Simulation.Update(lg.timer.GetDelta(), lg.thrust)
-		lg.render()
-		lg.window.UpdateSurface()
+		lg.Graphic.render()
+		lg.window.SwapBuffers()
 	}
 }
