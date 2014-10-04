@@ -19,10 +19,11 @@ const (
 )
 
 type Lander struct {
-	position Vector2D
-	velocity Vector2D
-	thrust   float64
-	state    LanderState
+	position       Vector2D
+	velocity       Vector2D
+	thrust         float64
+	crashTolerance float64
+	state          LanderState
 }
 
 type Simulation struct {
@@ -39,10 +40,14 @@ func (simulation *Simulation) Start() {
 	simulation.lander.position.X = 400
 	simulation.lander.position.Y = 600
 
+	simulation.lander.state.fuel = 100
+	simulation.lander.state.exploded = false
+
 	simulation.lander.velocity.X = 0
 	simulation.lander.velocity.Y = 0
 
 	simulation.lander.thrust = 5.0
+	simulation.lander.crashTolerance = 2.0
 }
 
 func (simulation *Simulation) GetLander() *Lander {
