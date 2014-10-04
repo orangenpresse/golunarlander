@@ -1,8 +1,8 @@
 package simulation
 
 import (
-	_ "fmt"
-	"math"
+	"fmt"
+	_ "math"
 	_ "time"
 )
 
@@ -39,7 +39,8 @@ func (simulation *Simulation) Update(timeDelta int64, ThrusterOn bool) {
 	if simulation.lander.position.Y > 0.0 {
 		acceleration -= G
 	} else {
-		if math.Abs(simulation.lander.velocity.Y) > simulation.lander.crashTolerance {
+		if simulation.lander.velocity.Y < -simulation.lander.crashTolerance {
+			fmt.Printf("Crashed: v=%f\n", simulation.lander.velocity.Y)
 			simulation.lander.exploded = true
 			simulation.lander.tank.Level = 0
 		}
