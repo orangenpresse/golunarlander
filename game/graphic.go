@@ -32,7 +32,7 @@ func (lg *LunarLander) drawFuelBar() {
 	fuelBorder := sdl.Rect{int32(8), int32(posY + 3), 14, 104}
 	lg.surface.FillRect(&fuelBorder, 0x00c3c9c4)
 
-	var fuel int32 = 50
+	fuel := lg.Simulation.Lander.GetLanderState().fuel
 
 	fuelBar := sdl.Rect{int32(10), (100 - fuel) + int32(posY+5), 10, fuel}
 	lg.surface.FillRect(&fuelBar, 0x0000de3c)
