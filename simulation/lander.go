@@ -49,20 +49,20 @@ func (lander *Lander) IsThrusting() bool {
 func New() *Lander {
 	lander := new(Lander)
 
-	lander.position.X = 400
-	lander.position.Y = 600
+	lander.position.X = 0
+	lander.position.Y = 800
 
 	lander.velocity.X = 0
 	lander.velocity.Y = 0
 
 	lander.thruster.Acceleration = 5.0
-	lander.thruster.FuelConsumption = 10.0
+	lander.thruster.FuelConsumption = 5.0
 
 	lander.tank.Size = 100
 	lander.tank.Level = lander.tank.Size
 
 	lander.exploded = false
-	lander.crashTolerance = 2.0
+	lander.crashTolerance = 5.0
 
 	return lander
 }

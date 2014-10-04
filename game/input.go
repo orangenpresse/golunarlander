@@ -11,11 +11,12 @@ func (lg *LunarLander) handleEvents(w *glfw.Window, key glfw.Key, scancode int, 
 
 	if key == glfw.KeyUp && action == glfw.Press {
 		lg.thrust = true
-	} else {
+	} else if key == glfw.KeyUp && action == glfw.Release {
 		lg.thrust = false
 	}
 
 	if key == glfw.KeyR {
 		lg.Simulation.Start()
+		lg.Graphic.Lander = lg.Simulation.GetLander()
 	}
 }

@@ -35,6 +35,9 @@ func (lg *LunarLander) CreateWindow() {
 	}
 
 	window.MakeContextCurrent()
+	window.SetCloseCallback(func(window *glfw.Window) {
+		lg.run = false
+	})
 
 	// use vsync
 	glfw.SwapInterval(1)
