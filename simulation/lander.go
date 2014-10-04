@@ -17,3 +17,11 @@ type Lander struct {
 	crashTolerance float64
 	state          LanderState
 }
+
+func (lander *Lander) GetPosition() Vector2D {
+	return lander.position
+}
+
+func (lander *Lander) GetLanderState() LanderState {
+	return lander.state
+}
