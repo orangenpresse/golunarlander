@@ -25,11 +25,13 @@ func (simulation *Simulation) GetLander() *Lander {
 	return simulation.lander
 }
 
-func (simulation *Simulation) Update(timeDelta int64, TrusterOn bool) {
+func (simulation *Simulation) Update(timeDelta int64, ThrusterOn bool) {
 	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 	var acceleration float64 = 0
 
-	if TrusterOn && simulation.lander.tank.Level > 0.0 {
+	simulation.lander.Thrust(ThrusterOn)
+
+	if simulation.lander.thruster.Thrusting {
 		acceleration += simulation.lander.thruster.Acceleration
 		simulation.lander.tank.Level -= simulation.lander.thruster.FuelConsumption * interval
 	}
