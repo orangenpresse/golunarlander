@@ -1,5 +1,9 @@
 package simulation
 
+import (
+	"math"
+)
+
 type Vector2D struct {
 	X float64
 	Y float64
@@ -32,6 +36,10 @@ func (lander *Lander) GetPosition() Vector2D {
 
 func (lander *Lander) IsExploded() bool {
 	return lander.exploded
+}
+
+func (lander *Lander) IsLanded() bool {
+	return math.Abs(lander.position.Y) < 0.01 && math.Abs(lander.velocity.Y) < 0.01
 }
 
 func (lander *Lander) GetFuelLevel() int64 {
