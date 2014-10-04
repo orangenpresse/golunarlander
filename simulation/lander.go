@@ -56,7 +56,7 @@ func New() *Lander {
 	lander.velocity.Y = 0
 
 	lander.thruster.Acceleration = 5.0
-	lander.thruster.FuelConsumption = 3.0
+	lander.thruster.FuelConsumption = 10.0
 
 	lander.tank.Size = 100
 	lander.tank.Level = lander.tank.Size
