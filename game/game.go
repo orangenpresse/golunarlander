@@ -1,9 +1,8 @@
 package game
 
 import (
-	_ "fmt"
+	glfw "github.com/go-gl/glfw3"
 	"github.com/orangenpresse/golunarlander/simulation"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type LunarLander struct {
@@ -11,33 +10,32 @@ type LunarLander struct {
 	thrust     bool
 	Width      int64
 	Height     int64
-	surface    *sdl.Surface
-	window     *sdl.Window
 	timer      Timer
+	window     *glfw.Window
 	Simulation simulation.Simulation
 }
 
-func (lg *LunarLander) Start() {
+func (lg *LunarLander) Start(window *glfw.Window) {
 	lg.run = true
+	lg.window = window
+	lg.window.SetKeyCallback(lg.handleEvents)
 	lg.timer.Start()
 	lg.Simulation = simulation.Simulation{}
 	lg.Simulation.Start()
-	lg.window = sdl.CreateWindow("Lunar Lander", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, int(lg.Width), int(lg.Height), sdl.WINDOW_SHOWN)
-	lg.surface = lg.window.GetSurface()
 	lg.mainLoop()
 	lg.end()
 }
 
 func (lg *LunarLander) end() {
-	lg.window.Destroy()
+	lg.window.SetShouldClose(true)
 }
 
 func (lg *LunarLander) mainLoop() {
+	glfw.Init()
 	for lg.run == true {
 		lg.timer.Update()
-		lg.handleEvents()
+		glfw.PollEvents()
 		lg.Simulation.Update(lg.timer.GetDelta(), lg.thrust)
 		lg.render()
-		lg.window.UpdateSurface()
 	}
 }
