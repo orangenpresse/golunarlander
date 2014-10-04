@@ -60,20 +60,16 @@ func (lg *LunarLander) drawThrust(posX int32, posY int32) {
 }
 
 func (lg *LunarLander) drawExploded(posX int32, posY int32) {
-	//if lg.Simulation.GetLander().GetLanderState().Exploded {
-	for x, y := 0, 0; x < 3; {
-		p1x := x
-		p1y := y
-		p2x := 100 - x
-		p2y := 100 - y
+	if lg.Simulation.GetLander().IsExploded() {
+		p1x, p1y, p2x, p2y := 0, 0, 20, 20
 
 		renderer := lg.window.GetRenderer()
-		renderer.SetDrawColor(0, 255, 0, 0)
+		renderer.SetDrawColor(255, 128, 0, 0)
 		renderer.DrawLine(p1x, p1y, p2x, p2y)
-		renderer.DrawLine(0, 0, 100, 100)
-		x++
-		y++
-		//fmt.Println(x, y)
+		renderer.DrawLine(p1x, p2y, p2x, p1y)
+		renderer.DrawLine(p2x/2, p1y, p2x/2, p2y)
+
+		// TODO ALL TO RENDERER
+		renderer.Present()
 	}
-	//}
 }
