@@ -9,6 +9,7 @@ import (
 )
 
 type Graphic struct {
+	shaderVersion     string
 	verticies         []float32
 	vao               gl.VertexArray
 	vbo               gl.Buffer
@@ -20,9 +21,10 @@ type Graphic struct {
 	Lander            *simulation.Lander
 }
 
-func (lg *LunarLanderGame) initGraphics() {
+func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
 	lg.Graphic = new(Graphic)
 	g := lg.Graphic
+	g.shaderVersion = shaderVersion
 	g.Lander = lg.Simulation.GetLander()
 
 	g.frameBufferWidth, g.frameBufferHeight = lg.window.GetFramebufferSize()
@@ -48,27 +50,39 @@ func (g *Graphic) initBuffers() {
 	g.vbo.Bind(gl.ARRAY_BUFFER)
 }
 
-func (g *Graphic) compileShaders() {
-	if data, err := ioutil.ReadFile("./game/shader/vertexShader.glsl"); err != nil {
+func (g *Graphic) getShaders() (vertexShader string, fragmentShader string) {
+	if data, err := ioutil.ReadFile("./game/shader/vertexShader" + g.shaderVersion + ".glsl"); err != nil {
 		fmt.Println("VertexShader Read Error:" + err.Error())
+		panic("VertexShader not found")
 	} else {
-		g.vertex_shader = gl.CreateShader(gl.VERTEX_SHADER)
-		g.vertex_shader.Source(string(data))
-		g.vertex_shader.Compile()
-		if info := g.vertex_shader.GetInfoLog(); info != "" {
-			fmt.Println(info)
-		}
+		vertexShader = string(data)
 	}
 
-	if data, err := ioutil.ReadFile("./game/shader/fragmentShader.glsl"); err != nil {
+	if data, err := ioutil.ReadFile("./game/shader/fragmentShader" + g.shaderVersion + ".glsl"); err != nil {
 		fmt.Println("FragmentShader Read Error:" + err.Error())
+		panic("FragmentShader not found")
 	} else {
-		g.fragment_shader = gl.CreateShader(gl.FRAGMENT_SHADER)
-		g.fragment_shader.Source(string(data))
-		g.fragment_shader.Compile()
-		if info := g.fragment_shader.GetInfoLog(); info != "" {
-			fmt.Println(info)
-		}
+		fragmentShader = string(data)
+	}
+
+	return vertexShader, fragmentShader
+}
+
+func (g *Graphic) compileShaders() {
+	vertexShader, fragmentShader := g.getShaders()
+
+	g.vertex_shader = gl.CreateShader(gl.VERTEX_SHADER)
+	g.vertex_shader.Source(vertexShader)
+	g.vertex_shader.Compile()
+	if info := g.vertex_shader.GetInfoLog(); info != "" {
+		fmt.Println(info)
+	}
+
+	g.fragment_shader = gl.CreateShader(gl.FRAGMENT_SHADER)
+	g.fragment_shader.Source(fragmentShader)
+	g.fragment_shader.Compile()
+	if info := g.fragment_shader.GetInfoLog(); info != "" {
+		fmt.Println(info)
 	}
 
 	g.program = gl.CreateProgram()
