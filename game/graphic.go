@@ -15,17 +15,17 @@ type Graphic struct {
 	vertex_shader     gl.Shader
 	fragment_shader   gl.Shader
 	frameBufferHeight int
-	frameBufferWidht  int
+	frameBufferWidth  int
 	program           gl.Program
 	Lander            *simulation.Lander
 }
 
-func (lg *LunarLander) initGraphics() {
-	g := Graphic{}
-	lg.Graphic = &g
+func (lg *LunarLanderGame) initGraphics() {
+	lg.Graphic = new(Graphic)
+	g := lg.Graphic
 	g.Lander = lg.Simulation.GetLander()
 
-	g.frameBufferWidht, g.frameBufferHeight = lg.window.GetFramebufferSize()
+	g.frameBufferWidth, g.frameBufferHeight = lg.window.GetFramebufferSize()
 
 	gl.Init()
 	g.initBuffers()
@@ -95,7 +95,7 @@ func (g *Graphic) render() {
 }
 
 func (g *Graphic) clear() {
-	gl.Viewport(0, 0, g.frameBufferWidht, g.frameBufferHeight)
+	gl.Viewport(0, 0, g.frameBufferWidth, g.frameBufferHeight)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 
