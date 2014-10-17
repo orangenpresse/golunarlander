@@ -24,10 +24,10 @@ func (lg *LunarLander) CreateWindow() {
 	glfw.SetErrorCallback(lg.handleErrors)
 
 	glfw.Init()
-	glfw.WindowHint(glfw.ContextVersionMajor, 3)
-	glfw.WindowHint(glfw.ContextVersionMinor, 3)
-	glfw.WindowHint(glfw.OpenglForwardCompatible, glfw.True)
-	glfw.WindowHint(glfw.OpenglProfile, glfw.OpenglCoreProfile)
+	//glfw.WindowHint(glfw.ContextVersionMajor, 3)
+	//glfw.WindowHint(glfw.ContextVersionMinor, 0)
+	//glfw.WindowHint(glfw.OpenglForwardCompatible, glfw.True)
+	//glfw.WindowHint(glfw.OpenglProfile, glfw.OpenglCoreProfile)
 
 	window, err := glfw.CreateWindow(lg.Width, lg.Height, "Lunar Lander", nil, nil)
 	if err != nil {
