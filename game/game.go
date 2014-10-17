@@ -9,7 +9,7 @@ import (
 
 type LunarLanderGame struct {
 	run        bool
-	thrust     bool
+	thrust     simulation.ThrusterState
 	Width      int
 	Height     int
 	timer      Timer
