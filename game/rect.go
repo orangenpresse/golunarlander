@@ -1,0 +1,5 @@
+package game
+
+struct Rect {
+	
+}
