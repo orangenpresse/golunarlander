@@ -253,25 +253,37 @@ func (g *Graphic) drawLander() {
 
 func (g *Graphic) drawThrust(posX float32, posY float32) {
 	thrusterState := g.Lander.IsThrusting()
+
 	if thrusterState.Bottom {
-
-		model := mgl32.Ident4()
-
-		scaleMatrix := mgl32.Scale3D(0.03, 0.01, 1)
-		model = scaleMatrix.Mul4(model)
-
-		translationMatrix := mgl32.Translate3D(posX, posY-0.08, 0.0)
-		model = translationMatrix.Mul4(model)
-
-		modelUniform := g.program.GetUniformLocation("model")
-		modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-		color := g.program.GetUniformLocation("color")
-		color.Uniform4fv(1, []float32{1, 0, 0, 0})
-		g.program.BindFragDataLocation(0, "outColor")
-
-		gl.DrawArrays(gl.TRIANGLES, 0, 6)
+		g.drawThrusterFlame(posX, posY-0.08)
 	}
+
+	if thrusterState.Left {
+		g.drawThrusterFlame(posX-0.05, posY)
+	}
+
+	if thrusterState.Right {
+		g.drawThrusterFlame(posX+0.05, posY)
+	}
+}
+
+func (g *Graphic) drawThrusterFlame(posX float32, posY float32) {
+	model := mgl32.Ident4()
+
+	scaleMatrix := mgl32.Scale3D(0.03, 0.01, 1)
+	model = scaleMatrix.Mul4(model)
+
+	translationMatrix := mgl32.Translate3D(posX, posY, 0.0)
+	model = translationMatrix.Mul4(model)
+
+	modelUniform := g.program.GetUniformLocation("model")
+	modelUniform.UniformMatrix4fv(false, [16]float32(model))
+
+	color := g.program.GetUniformLocation("color")
+	color.Uniform4fv(1, []float32{1, 0, 0, 0})
+	g.program.BindFragDataLocation(0, "outColor")
+
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 }
 
 func (g *Graphic) drawExploded(posX float32, posY float32) {

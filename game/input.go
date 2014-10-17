@@ -19,14 +19,14 @@ func (lg *LunarLanderGame) handleEvents(w *glfw.Window, key glfw.Key, scancode i
 	// Left
 	if key == glfw.KeyLeft && action == glfw.Press {
 		lg.thrust.Right = true
-	} else if key == glfw.KeyUp && action == glfw.Release {
+	} else if key == glfw.KeyLeft && action == glfw.Release {
 		lg.thrust.Right = false
 	}
 
 	// Right
 	if key == glfw.KeyRight && action == glfw.Press {
 		lg.thrust.Left = true
-	} else if key == glfw.KeyUp && action == glfw.Release {
+	} else if key == glfw.KeyRight && action == glfw.Release {
 		lg.thrust.Left = false
 	}
 

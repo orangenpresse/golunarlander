@@ -1,7 +1,7 @@
 package simulation
 
 import (
-	_ "fmt"
+	"fmt"
 	_ "math"
 	_ "time"
 )
@@ -25,6 +25,7 @@ type ThrusterState struct {
 
 func (simulation *Simulation) Start() {
 	simulation.lander = New()
+	fmt.Println("Simulation started")
 }
 
 func (simulation *Simulation) GetLander() *Lander {
@@ -34,4 +35,7 @@ func (simulation *Simulation) GetLander() *Lander {
 func (simulation *Simulation) Update(timeDelta int64, thrusterState ThrusterState) {
 	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 	simulation.lander.Update(interval, thrusterState)
+
+	fmt.Printf("%f\t%f\n", simulation.lander.velocity.X, simulation.lander.position.X)
+	//fmt.Printf("Bottom: %b, Left: %b, Right %b\n", thrusterState.Bottom, thrusterState.Left, thrusterState.Right)
 }
