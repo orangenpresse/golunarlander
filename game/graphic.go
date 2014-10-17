@@ -252,7 +252,8 @@ func (g *Graphic) drawLander() {
 }
 
 func (g *Graphic) drawThrust(posX float32, posY float32) {
-	if g.Lander.IsThrusting() {
+	thrusterState := g.Lander.IsThrusting()
+	if thrusterState.Bottom {
 
 		model := mgl32.Ident4()
 
