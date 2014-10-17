@@ -33,29 +33,5 @@ func (simulation *Simulation) GetLander() *Lander {
 
 func (simulation *Simulation) Update(timeDelta int64, thrusterState ThrusterState) {
 	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
-	//	var acceleration float64 = 0
-
 	simulation.lander.Update(interval, thrusterState)
-
-	/*	if simulation.lander.thruster.Thrusting {
-			acceleration += simulation.lander.thruster.Acceleration
-			simulation.lander.tank.Level -= simulation.lander.thruster.FuelConsumption * interval
-		}
-
-		if simulation.lander.position.Y > 0.0 {
-			acceleration -= G
-		} else {
-			if simulation.lander.velocity.Y < -simulation.lander.crashTolerance {
-				fmt.Printf("Crashed: v=%f\n", simulation.lander.velocity.Y)
-				simulation.lander.exploded = true
-				simulation.lander.tank.Level = 0
-			}
-
-			simulation.lander.velocity.Y = 0.0
-			simulation.lander.position.Y = 0.0
-		}
-
-		simulation.lander.velocity.Y += acceleration * interval
-		simulation.lander.position.Y += simulation.lander.velocity.Y * interval
-	*/
 }
