@@ -7,7 +7,7 @@ import (
 	"runtime"
 )
 
-type LunarLander struct {
+type LunarLanderGame struct {
 	run        bool
 	thrust     bool
 	Width      int
@@ -18,7 +18,7 @@ type LunarLander struct {
 	Graphic    *Graphic
 }
 
-func (lg *LunarLander) CreateWindow() {
+func (lg *LunarLanderGame) CreateWindow() {
 	runtime.LockOSThread()
 
 	glfw.SetErrorCallback(lg.handleErrors)
@@ -45,11 +45,11 @@ func (lg *LunarLander) CreateWindow() {
 	lg.window = window
 }
 
-func (lg *LunarLander) handleErrors(err glfw.ErrorCode, msg string) {
+func (lg *LunarLanderGame) handleErrors(err glfw.ErrorCode, msg string) {
 	fmt.Printf("GLFW ERROR: %v: %v\n", err, msg)
 }
 
-func (lg *LunarLander) Start() {
+func (lg *LunarLanderGame) Start() {
 	lg.CreateWindow()
 	lg.run = true
 	lg.window.SetKeyCallback(lg.handleEvents)
@@ -61,14 +61,14 @@ func (lg *LunarLander) Start() {
 	lg.end()
 }
 
-func (lg *LunarLander) end() {
+func (lg *LunarLanderGame) end() {
 	lg.Graphic.end()
 	lg.window.SetShouldClose(true)
 	lg.window.Destroy()
 	glfw.Terminate()
 }
 
-func (lg *LunarLander) mainLoop() {
+func (lg *LunarLanderGame) mainLoop() {
 	for lg.run == true {
 		lg.timer.Update()
 		glfw.PollEvents()
