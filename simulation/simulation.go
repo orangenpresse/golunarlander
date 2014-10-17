@@ -17,6 +17,12 @@ type Simulation struct {
 	lander *Lander
 }
 
+type ThrusterState struct {
+	Bottom bool
+	Left   bool
+	Right  bool
+}
+
 func (simulation *Simulation) Start() {
 	simulation.lander = New()
 }
@@ -25,11 +31,11 @@ func (simulation *Simulation) GetLander() *Lander {
 	return simulation.lander
 }
 
-func (simulation *Simulation) Update(timeDelta int64, ThrusterOn bool) {
+func (simulation *Simulation) Update(timeDelta int64, thrusterState ThrusterState) {
 	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 	var acceleration float64 = 0
 
-	simulation.lander.Thrust(ThrusterOn)
+	simulation.lander.Thrust(thrusterState.Bottom)
 
 	if simulation.lander.thruster.Thrusting {
 		acceleration += simulation.lander.thruster.Acceleration
@@ -40,7 +46,7 @@ func (simulation *Simulation) Update(timeDelta int64, ThrusterOn bool) {
 		acceleration -= G
 	} else {
 		if simulation.lander.velocity.Y < -simulation.lander.crashTolerance {
-			//fmt.Printf("Crashed: v=%f\n", simulation.lander.velocity.Y)
+			fmt.Printf("Crashed: v=%f\n", simulation.lander.velocity.Y)
 			simulation.lander.exploded = true
 			simulation.lander.tank.Level = 0
 		}

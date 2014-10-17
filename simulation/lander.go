@@ -21,10 +21,12 @@ type Tank struct {
 }
 
 type Lander struct {
-	position Vector2D
-	velocity Vector2D
-	thruster Thruster
-	tank     Tank
+	position       Vector2D
+	velocity       Vector2D
+	thrusterBottom Thruster
+	thrusterLeft   Thruster
+	thrusterRight  Thruster
+	tank           Tank
 
 	crashTolerance float64
 	exploded       bool
