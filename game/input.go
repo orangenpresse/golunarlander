@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	glfw "github.com/go-gl/glfw3"
 )
 
@@ -32,7 +33,13 @@ func (lg *LunarLanderGame) handleEvents(w *glfw.Window, key glfw.Key, scancode i
 
 	// R
 	if key == glfw.KeyR {
-		lg.Simulation.Start()
+		lg.Simulation.Start(&lg.Options)
 		lg.Graphic.Lander = lg.Simulation.GetLander()
+	}
+
+	// D
+	if key == glfw.KeyD && action == glfw.Press {
+		lg.Options.DebugMode = !lg.Options.DebugMode
+		fmt.Println("Switched Debug!")
 	}
 }

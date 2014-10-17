@@ -220,7 +220,7 @@ func (g *Graphic) drawFuelBar(posX float32, posY float32) {
 func (g *Graphic) drawLander() {
 	landerPos := g.Lander.GetPosition()
 	posY := float32(landerPos.Y/200) - 2.1
-	posX := float32(landerPos.X)
+	posX := float32(landerPos.X / 200)
 
 	model := mgl32.Ident4()
 

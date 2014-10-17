@@ -16,6 +16,7 @@ type LunarLanderGame struct {
 	window     *glfw.Window
 	Simulation simulation.Simulation
 	Graphic    *Graphic
+	Options    simulation.Options
 }
 
 func (lg *LunarLanderGame) CreateWindow() {
@@ -54,8 +55,9 @@ func (lg *LunarLanderGame) Start() {
 	lg.run = true
 	lg.window.SetKeyCallback(lg.handleEvents)
 	lg.timer.Start()
+	lg.Options = simulation.Options{false}
 	lg.Simulation = simulation.Simulation{}
-	lg.Simulation.Start()
+	lg.Simulation.Start(&lg.Options)
 	lg.initGraphics()
 	lg.mainLoop()
 	lg.end()

@@ -5,10 +5,6 @@ import (
 	"math"
 )
 
-const (
-	Debug = true
-)
-
 type Vector2D struct {
 	X float64
 	Y float64
@@ -29,10 +25,13 @@ type Lander struct {
 
 	crashTolerance float64
 	exploded       bool
+	options        *Options
 }
 
-func New() *Lander {
+func New(options *Options) *Lander {
 	lander := new(Lander)
+
+	lander.options = options
 
 	lander.position.X = 0
 	lander.position.Y = 800
@@ -43,18 +42,13 @@ func New() *Lander {
 	lander.thrusterBottom.Acceleration = 5.0
 	lander.thrusterBottom.FuelConsumption = 5.0
 
-	lander.thrusterLeft.Acceleration = 0.05
+	lander.thrusterLeft.Acceleration = 5.0
 	lander.thrusterLeft.FuelConsumption = 1.0
 
-	lander.thrusterRight.Acceleration = 0.05
+	lander.thrusterRight.Acceleration = 5.0
 	lander.thrusterRight.FuelConsumption = 1.0
 
 	lander.tank.Size = 100
-
-	if Debug {
-		lander.tank.Size *= 1000
-	}
-
 	lander.tank.Level = lander.tank.Size
 
 	lander.exploded = false
@@ -80,6 +74,12 @@ func (lander *Lander) GetFuelLevel() int64 {
 }
 
 func (lander *Lander) setThrust(state ThrusterState) {
+
+	if lander.options.DebugMode {
+		lander.tank.Level = lander.tank.Size
+		lander.exploded = false
+	}
+
 	lander.thrusterBottom.Thrusting = state.Bottom && lander.tank.Level > 0.0
 	lander.thrusterLeft.Thrusting = state.Left && lander.tank.Level > 0.0
 	lander.thrusterRight.Thrusting = state.Right && lander.tank.Level > 0.0
@@ -115,7 +115,7 @@ func (this *Lander) calculateFallingAcceleration() float64 {
 	if this.position.Y > 0.0 {
 		return -G
 	} else {
-		if this.velocity.Y < -this.crashTolerance {
+		if this.velocity.Y < -this.crashTolerance && !this.options.DebugMode {
 			fmt.Printf("Crashed: v=%f\n", this.velocity.Y)
 			this.exploded = true
 			this.tank.Level = 0
