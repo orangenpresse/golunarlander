@@ -27,7 +27,8 @@ func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
 	glfw.Init()
 
 	version := glfw.GetVersionString()
-	if version == "3.0.4 Cocoa NSGL chdir menubar" {
+	fmt.Println(version)
+	if version == "3.0.4 Cocoa NSGL chdir menubar" || version == "3.1.0 Cocoa NSGL chdir menubar retina dynamic" {
 		glfw.WindowHint(glfw.ContextVersionMajor, 3)
 		glfw.WindowHint(glfw.ContextVersionMinor, 3)
 		glfw.WindowHint(glfw.OpenglForwardCompatible, glfw.True)
