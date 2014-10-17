@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	game := game.LunarLanderGame{Width: 800, Height: 600}
+	game := game.LunarLanderGame{Width: 1024, Height: 768}
 	game.Start()
 }
