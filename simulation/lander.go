@@ -76,7 +76,9 @@ func (lander *Lander) GetFuelLevel() int64 {
 func (lander *Lander) setThrust(state ThrusterState) {
 
 	if lander.options.DebugMode {
-		lander.tank.Level = lander.tank.Size
+		if lander.tank.Level <= 0.0 {
+			lander.tank.Level = lander.tank.Size
+		}
 		lander.exploded = false
 	}
 

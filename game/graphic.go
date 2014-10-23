@@ -19,11 +19,13 @@ type Graphic struct {
 	frameBufferWidth  int
 	program           gl.Program
 	Lander            *simulation.Lander
+	Options           *simulation.Options
 }
 
 func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
 	lg.Graphic = new(Graphic)
 	g := lg.Graphic
+	g.Options = &lg.Options
 	g.shaderVersion = shaderVersion
 	g.Lander = lg.Simulation.GetLander()
 
@@ -112,7 +114,6 @@ func (g *Graphic) clear() {
 	gl.Viewport(0, 0, g.frameBufferWidth, g.frameBufferHeight)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
-
 }
 
 func (g *Graphic) setPerspectiveAndCamera() {
@@ -174,7 +175,11 @@ func (g *Graphic) drawHud() {
 	defer positionAttrib.DisableArray()
 
 	color := g.program.GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{0.3, 0.3, 0.3, 0})
+	if g.Options.DebugMode {
+		color.Uniform4fv(1, []float32{0.0, 0.3, 1.0, 0})
+	} else {
+		color.Uniform4fv(1, []float32{0.3, 0.3, 0.3, 0})
+	}
 	g.program.BindFragDataLocation(0, "outColor")
 
 	gl.DrawArrays(gl.TRIANGLES, 0, 6)
@@ -225,7 +230,7 @@ func (g *Graphic) drawFuelBar(posX float32, posY float32) {
 	defer positionAttrib.DisableArray()
 
 	color := g.program.GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{0.3, 1, 0.3, 0})
+	color.Uniform4fv(1, []float32{1 - fuel, fuel, 0.1, 0})
 	g.program.BindFragDataLocation(0, "outColor")
 
 	gl.DrawArrays(gl.TRIANGLES, 0, 6)
