@@ -1,4 +1,4 @@
-package game
+package graphic
 
 import (
 	"fmt"
@@ -11,9 +11,6 @@ import (
 
 type Graphic struct {
 	shaderVersion     string
-	verticies         []float32
-	vao               gl.VertexArray
-	vbo               gl.Buffer
 	vertex_shader     gl.Shader
 	fragment_shader   gl.Shader
 	frameBufferHeight int
@@ -21,36 +18,6 @@ type Graphic struct {
 	program           gl.Program
 	Lander            lander.LanderInterface
 	Options           *data.Options
-}
-
-func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
-	lg.Graphic = new(Graphic)
-	g := lg.Graphic
-	g.Options = &lg.Options
-	g.shaderVersion = shaderVersion
-	g.Lander = lg.Simulation.GetLander()
-
-	g.frameBufferWidth, g.frameBufferHeight = lg.window.GetFramebufferSize()
-
-	gl.Init()
-	g.initBuffers()
-	g.compileShaders()
-	verticies := []float32{
-		-1, -1, 0,
-		1, -1, 0,
-		-1, 1, 0,
-		-1, 1, 0,
-		1, 1, 0,
-		1, -1, 0}
-	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*4, verticies, gl.STATIC_DRAW)
-}
-
-func (g *Graphic) initBuffers() {
-	g.vao = gl.GenVertexArray()
-	g.vao.Bind()
-
-	g.vbo = gl.GenBuffer()
-	g.vbo.Bind(gl.ARRAY_BUFFER)
 }
 
 func (g *Graphic) getShaders() (vertexShader string, fragmentShader string) {

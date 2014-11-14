@@ -4,6 +4,7 @@ import (
 	"fmt"
 	glfw "github.com/go-gl/glfw3"
 	data "github.com/orangenpresse/golunarlander/dataObjects"
+	"github.com/orangenpresse/golunarlander/game/graphic"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"runtime"
 )
@@ -16,7 +17,7 @@ type LunarLanderGame struct {
 	timer      Timer
 	window     *glfw.Window
 	Simulation simulation.Simulation
-	Graphic    *Graphic
+	Graphic    *graphic.Graphic
 	Options    data.Options
 }
 
@@ -54,6 +55,19 @@ func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
 
 	lg.window = window
 	return shaderVersion
+}
+
+func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
+	lg.Graphic = new(graphic.Graphic)
+	g := lg.Graphic
+	g.Options = &lg.Options
+	g.shaderVersion = shaderVersion
+	g.Lander = lg.Simulation.GetLander()
+
+	g.frameBufferWidth, g.frameBufferHeight = lg.window.GetFramebufferSize()
+
+	gl.Init()
+	g.compileShaders()
 }
 
 func (lg *LunarLanderGame) handleErrors(err glfw.ErrorCode, msg string) {
