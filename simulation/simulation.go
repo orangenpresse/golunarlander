@@ -2,12 +2,13 @@ package simulation
 
 import (
 	"fmt"
+	data "github.com/orangenpresse/golunarlander/dataObjects"
+	"github.com/orangenpresse/golunarlander/lander"
 	_ "math"
 	_ "time"
 )
 
 const (
-	G              = 1.635
 	interval       = 0.001
 	endTime        = 200000
 	slownessFactor = 0.1
@@ -15,30 +16,20 @@ const (
 	SimulationAreaWidth = 1280
 )
 
-type Options struct {
-	DebugMode bool
-}
-
 type Simulation struct {
-	lander *Lander
+	lander lander.LanderInterface
 }
 
-type ThrusterState struct {
-	Bottom bool
-	Left   bool
-	Right  bool
-}
-
-func (simulation *Simulation) Start(options *Options) {
-	simulation.lander = New(options)
+func (simulation *Simulation) Start(options *data.Options) {
+	simulation.lander = lander.NewDefaultLander(options)
 	fmt.Println("Simulation started")
 }
 
-func (simulation *Simulation) GetLander() *Lander {
+func (simulation *Simulation) GetLander() lander.LanderInterface {
 	return simulation.lander
 }
 
-func (simulation *Simulation) Update(timeDelta int64, thrusterState ThrusterState) {
+func (simulation *Simulation) Update(timeDelta int64, thrusterState data.ThrusterState) {
 	var interval float64 = float64(timeDelta) / (1000000000 * slownessFactor)
 	simulation.lander.Update(interval, thrusterState)
 
@@ -50,9 +41,13 @@ func (simulation *Simulation) Update(timeDelta int64, thrusterState ThrusterStat
 }
 
 func (simulation *Simulation) enforceLanderInSimulationArea() {
-	if simulation.lander.position.X > (SimulationAreaWidth / 2) {
-		simulation.lander.position.X = -(SimulationAreaWidth / 2)
-	} else if simulation.lander.position.X < -(SimulationAreaWidth / 2) {
-		simulation.lander.position.X = (SimulationAreaWidth / 2)
+	landerPos := simulation.lander.GetPosition()
+
+	if landerPos.X > (SimulationAreaWidth / 2) {
+		landerPos.X = -(SimulationAreaWidth / 2)
+		simulation.lander.SetPosition(landerPos)
+	} else if landerPos.X < -(SimulationAreaWidth / 2) {
+		landerPos.X = (SimulationAreaWidth / 2)
+		simulation.lander.SetPosition(landerPos)
 	}
 }

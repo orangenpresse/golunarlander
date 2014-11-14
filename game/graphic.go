@@ -4,7 +4,8 @@ import (
 	"fmt"
 	gl "github.com/go-gl/gl"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/orangenpresse/golunarlander/simulation"
+	data "github.com/orangenpresse/golunarlander/dataObjects"
+	"github.com/orangenpresse/golunarlander/lander"
 	"io/ioutil"
 )
 
@@ -18,8 +19,8 @@ type Graphic struct {
 	frameBufferHeight int
 	frameBufferWidth  int
 	program           gl.Program
-	Lander            *simulation.Lander
-	Options           *simulation.Options
+	Lander            lander.LanderInterface
+	Options           *data.Options
 }
 
 func (lg *LunarLanderGame) initGraphics(shaderVersion string) {

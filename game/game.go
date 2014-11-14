@@ -3,20 +3,21 @@ package game
 import (
 	"fmt"
 	glfw "github.com/go-gl/glfw3"
+	data "github.com/orangenpresse/golunarlander/dataObjects"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"runtime"
 )
 
 type LunarLanderGame struct {
 	run        bool
-	thrust     simulation.ThrusterState
+	thrust     data.ThrusterState
 	Width      int
 	Height     int
 	timer      Timer
 	window     *glfw.Window
 	Simulation simulation.Simulation
 	Graphic    *Graphic
-	Options    simulation.Options
+	Options    data.Options
 }
 
 func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
@@ -64,7 +65,7 @@ func (lg *LunarLanderGame) Start() {
 	lg.run = true
 	lg.window.SetKeyCallback(lg.handleEvents)
 	lg.timer.Start()
-	lg.Options = simulation.Options{false}
+	lg.Options = data.Options{false}
 	lg.Simulation = simulation.Simulation{}
 	lg.Simulation.Start(&lg.Options)
 	lg.initGraphics(shaderVersion)
