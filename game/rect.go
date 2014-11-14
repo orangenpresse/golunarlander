@@ -1,62 +1,99 @@
 package game
 
-// import (
-// 	"github.com/go-gl/mathgl/mgl32"
-// )
+import (
+	gl "github.com/go-gl/gl"
+	"github.com/go-gl/mathgl/mgl32"
+	"unsafe"
+)
 
-// type Rect struct {
-// 	modelMatrix mgl32.Mat4
-// 	scale       mgl32.Vec3
-// 	rotation    mgl32.Vec3
-// 	translation mgl32.Vec3
-// }
+const FLOAT32_BYTE_SIZE int = int(unsafe.Sizeof(float32(0)))
 
-// func NewRect() *Rect {
-// 	r := new(Rect)
-// 	r.modelMatrix = mgl32.Ident4()
-// }
+type Rect struct {
+	modelMatrix   mgl32.Mat4
+	scaling       mgl32.Vec3
+	rotation      mgl32.Vec4
+	translation   mgl32.Vec3
+	color         mgl32.Vec4
+	shaderProgram *gl.Program
+}
 
-// func (r *Rect) scale() {
-// 	scaleMatrix := mgl32.Scale3D(0.06, 0.38*fuel, 1)
-// 	model = scaleMatrix.Mul4(model)
-// }
+func LoadToRam() {
+	verticies := []float32{
+		-1, -1, 0,
+		1, -1, 0,
+		-1, 1, 0,
+		-1, 1, 0,
+		1, 1, 0,
+		1, -1, 0}
+	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*FLOAT32_BYTE_SIZE, verticies, gl.STATIC_DRAW)
+}
 
-// func (r *Rect) rotate() {
-// 	rotMatrix := mgl32.HomogRotate3D(0.0, mgl32.Vec3{0, 0, 1})
-// 	model = rotMatrix.Mul4(model)
-// }
+func NewRect() *Rect {
+	r := new(Rect)
+	r.modelMatrix = mgl32.Ident4()
+	return r
+}
 
-// func (r *Rect) translate() {
-// 	translationMatrix := mgl32.Translate3D(posX, (posY+0.38*fuel)-0.38, 0.0)
-// 	model = translationMatrix.Mul4(model)
+func (r *Rect) SetScale(x float32, y float32, z float32) {
+	r.scaling = mgl32.Vec3{x, y, z}
+}
 
-// }
+func (r *Rect) SetRotation(deg float32, x float32, y float32, z float32) {
+	r.rotation = mgl32.Vec4{x, y, z, deg}
+}
 
-// func (r *Rect) setModelUniform() {
-// 	modelUniform := g.program.GetUniformLocation("model")
-// 	modelUniform.UniformMatrix4fv(false, [16]float32(model))
-// }
+func (r *Rect) SetTranslation(x float32, y float32, z float32) {
+	r.translation = mgl32.Vec3{x, y, z}
+}
 
-// func (r *Rect) setColor() {
-// 	color := g.program.GetUniformLocation("color")
-// 	color.Uniform4fv(1, []float32{0.3, 1, 0.3, 0})
-// 	g.program.BindFragDataLocation(0, "outColor")
-// }
+func (r *Rect) SetColor(red float32, green float32, blue float32, alpha float32) {
+	r.color = mgl32.Vec4{red, green, blue, alpha}
+}
 
-// func (r *Rect) drawTriangles() {
-// 	positionAttrib := g.program.GetAttribLocation("position")
-// 	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
-// 	positionAttrib.EnableArray()
-// 	defer positionAttrib.DisableArray()
+func (r *Rect) scale() {
+	scaleVector := r.scaling
+	scaleMatrix := mgl32.Scale3D(scaleVector.X(), scaleVector.Y(), scaleVector.Z())
+	r.modelMatrix = scaleMatrix.Mul4(r.modelMatrix)
+}
 
-// 	gl.DrawArrays(gl.TRIANGLES, 0, 6)
-// }
+func (r *Rect) rotate() {
+	rotationVector := r.rotation
+	rotMatrix := mgl32.HomogRotate3D(rotationVector.W(), rotationVector.Vec3())
+	r.modelMatrix = rotMatrix.Mul4(r.modelMatrix)
+}
 
-// func (r *Rect) Draw() {
-// 	r.scale()
-// 	r.rotate()
-// 	r.translate()
-// 	r.setModelUniform()
-// 	r.setColor()
-// 	r.drawTriangles()
-// }
+func (r *Rect) translate() {
+	translationVector := r.translation
+	translationMatrix := mgl32.Translate3D(translationVector.X(), translationVector.Y(), translationVector.Z())
+	r.modelMatrix = translationMatrix.Mul4(r.modelMatrix)
+}
+
+func (r *Rect) applyModelUniform() {
+	modelUniform := r.shaderProgram.GetUniformLocation("model")
+	modelUniform.UniformMatrix4fv(false, [16]float32(r.modelMatrix))
+}
+
+func (r *Rect) applyColor() {
+	colorVector := r.color
+	color := r.shaderProgram.GetUniformLocation("color")
+	color.Uniform4fv(1, []float32{colorVector.X(), colorVector.Y(), colorVector.Z(), colorVector.W()})
+	r.shaderProgram.BindFragDataLocation(0, "outColor")
+}
+
+func (r *Rect) drawTriangles() {
+	positionAttrib := r.shaderProgram.GetAttribLocation("position")
+	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
+	positionAttrib.EnableArray()
+	defer positionAttrib.DisableArray()
+
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+}
+
+func (r *Rect) Draw() {
+	r.scale()
+	r.rotate()
+	r.translate()
+	r.applyModelUniform()
+	r.applyColor()
+	r.drawTriangles()
+}
