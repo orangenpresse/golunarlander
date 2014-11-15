@@ -76,11 +76,12 @@ func (this *Server) makeUpdate() string {
 	for e := this.Clients.Front(); e != nil; e = e.Next() {
 		data += strconv.Itoa(e.Value.(*ClientConnection).Id) + ","
 		data += e.Value.(*ClientConnection).Name + ","
-		data += e.Value.(*ClientConnection).LastState + ";"
+		data += e.Value.(*ClientConnection).LastState
+		data += "\n"
 	}
 
 	defer fmt.Println(data)
-	return data + "\n"
+	return data
 }
 
 func (this *Server) OnNewConnection(connection net.Conn) {
