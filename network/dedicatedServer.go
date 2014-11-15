@@ -1,4 +1,4 @@
-package main
+package network
 
 import (
 	"container/list"
@@ -108,8 +108,8 @@ func (this *Server) OnNewConnection(connection net.Conn) {
 	fmt.Println("Connected Client: " + client.Name + " with ID:" + strconv.Itoa(client.Id))
 }
 
-func main() {
-	server := CreateServer(4711)
+func NewServer(port int16) {
+	server := CreateServer(port)
 	defer server.Listener.Close()
 
 	for {

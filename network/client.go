@@ -1,4 +1,4 @@
-package main
+package network
 
 import (
 	"bufio"
@@ -17,22 +17,25 @@ type Session struct {
 	ClientList *list.List
 }
 
-func sendStuff(conn net.Conn) {
+type Client struct {
+	Connection net.Conn
+}
+
+func (c *Client) sendStuff(conn net.Conn) {
 	message := bufio.NewReader(os.Stdin)
 	fmt.Println("Tell me something")
 	for {
-		line, err := message.ReadString('\n')
-		if err != nil {
+		if line, err := message.ReadString('\n'); err != nil {
 			fmt.Println("###Some shitty shit happend")
 			conn.Close()
-			break
+		} else {
+			_, err = conn.Write([]byte(line))
+			checkError(err)
 		}
-		_, err = conn.Write([]byte(line))
-		checkError(err)
 	}
 }
 
-func receiveStuff(conn net.Conn) {
+func (c *Client) receiveStuff(conn net.Conn) {
 	buffer := bufio.NewReader(conn)
 	for {
 		str, err := buffer.ReadString('\n')
@@ -47,10 +50,10 @@ func receiveStuff(conn net.Conn) {
 	}
 }
 
-func main() {
+func (c *Client) Connect(address string) {
 	reader := bufio.NewReader(os.Stdin)
 
-	conn, err := net.Dial("tcp", "127.0.0.1:4711")
+	conn, err := net.Dial("tcp", address)
 	checkError(err)
 
 	bufferId := bufio.NewReader(conn)
@@ -68,8 +71,13 @@ func main() {
 	_, err = conn.Write([]byte(username))
 	checkError(err)
 
-	go receiveStuff(conn)
-	sendStuff(conn)
+	go c.receiveStuff(conn)
+	c.sendStuff(conn)
+}
+
+func NewClient() *Client {
+	client := new(Client)
+	return client
 }
 
 // gimme some errors if con does not work
