@@ -5,20 +5,22 @@ import (
 	glfw "github.com/go-gl/glfw3"
 	data "github.com/orangenpresse/golunarlander/dataObjects"
 	"github.com/orangenpresse/golunarlander/game/graphic"
+	"github.com/orangenpresse/golunarlander/game/multiplayer"
 	"github.com/orangenpresse/golunarlander/simulation"
 	"runtime"
 )
 
 type LunarLanderGame struct {
-	run        bool
-	thrust     data.ThrusterState
-	Width      int
-	Height     int
-	timer      Timer
-	window     *glfw.Window
-	Simulation simulation.Simulation
-	Graphic    *graphic.Graphic
-	Options    data.Options
+	run         bool
+	thrust      data.ThrusterState
+	Width       int
+	Height      int
+	timer       Timer
+	window      *glfw.Window
+	Simulation  *simulation.Simulation
+	Graphic     *graphic.Graphic
+	Multiplayer *multiplayer.Multiplayer
+	Options     data.Options
 }
 
 func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
@@ -62,6 +64,10 @@ func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
 	lg.Graphic = graphic.NewGraphic(&lg.Options, shaderVersion, lg.Simulation.GetLander())
 }
 
+func (lg *LunarLanderGame) initMultiplayer() {
+	lg.Multiplayer = multiplayer.NewMultiplayer(lg.Simulation.GetLander())
+}
+
 func (lg *LunarLanderGame) handleErrors(err glfw.ErrorCode, msg string) {
 	fmt.Printf("GLFW ERROR: %v: %v\n", err, msg)
 }
@@ -73,9 +79,10 @@ func (lg *LunarLanderGame) Start() {
 	lg.timer.Start()
 	lg.Options = data.Options{}
 	lg.Options.DebugMode = false
-	lg.Simulation = simulation.Simulation{}
+	lg.Simulation = new(simulation.Simulation)
 	lg.Simulation.Start(&lg.Options)
 	lg.initGraphics(shaderVersion)
+	lg.initMultiplayer()
 	lg.mainLoop()
 	lg.end()
 }
@@ -92,6 +99,8 @@ func (lg *LunarLanderGame) mainLoop() {
 		lg.timer.Update()
 		glfw.PollEvents()
 		lg.Simulation.Update(lg.timer.GetDelta(), lg.thrust)
+		lg.Multiplayer.GetLanders()
+		lg.Multiplayer.SendUpdate()
 		lg.Graphic.Render()
 		lg.window.SwapBuffers()
 	}

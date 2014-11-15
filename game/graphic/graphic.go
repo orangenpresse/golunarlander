@@ -16,6 +16,7 @@ type Graphic struct {
 	fragment_shader gl.Shader
 	program         gl.Program
 	Lander          lander.LanderInterface
+	OtherLanders    []lander.LanderInterface
 	Options         *data.Options
 	rect            *model.Rect
 }
@@ -59,7 +60,7 @@ func (g *Graphic) Render() {
 	g.clear()
 	g.setPerspectiveAndCamera()
 	g.drawMoonSurface()
-	g.drawLander()
+	g.drawLander(nil)
 	g.drawHud()
 
 }
@@ -128,8 +129,14 @@ func (g *Graphic) drawFuelBar(posX float32, posY float32) {
 	g.rect.Draw()
 }
 
-func (g *Graphic) drawLander() {
-	landerPos := g.Lander.GetPosition()
+func (g *Graphic) drawLander(lander lander.LanderInterface) {
+	var landerPos data.Vector2D
+	if lander != nil {
+		landerPos = lander.GetPosition()
+	} else {
+		landerPos = g.Lander.GetPosition()
+	}
+
 	posY := float32(landerPos.Y/200) - 2.1
 	posX := float32(landerPos.X / 200)
 

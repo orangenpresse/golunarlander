@@ -18,22 +18,29 @@ type Session struct {
 }
 
 type Client struct {
+	connected   bool
 	Connection  net.Conn
+	outgoing    chan string
 	receiveFunc func(data string)
 }
 
 func (c *Client) sendStuff(conn net.Conn) {
-	message := bufio.NewReader(os.Stdin)
-	fmt.Println("Tell me something")
 	for {
-		if line, err := message.ReadString('\n'); err != nil {
-			fmt.Println("###Some shitty shit happend")
-			conn.Close()
-		} else {
-			_, err = conn.Write([]byte(line))
-			checkError(err)
-		}
+		data := <-c.outgoing
+		_, err := conn.Write([]byte(data))
+		checkError(err)
 	}
+}
+
+func (c *Client) SendData(data string) {
+	if c.connected == false {
+		return
+	}
+	select {
+	case c.outgoing <- data:
+	default: //Discard values if channel is full
+	}
+
 }
 
 func (c *Client) receiveStuff(conn net.Conn) {
@@ -54,31 +61,36 @@ func (c *Client) receiveStuff(conn net.Conn) {
 func (c *Client) Connect(address string) {
 	reader := bufio.NewReader(os.Stdin)
 
-	conn, err := net.Dial("tcp", address)
-	checkError(err)
+	if conn, err := net.Dial("tcp", address); err != nil {
+		c.connected = false
+		checkError(err)
+		return
+	} else {
+		bufferId := bufio.NewReader(conn)
+		myId, err := bufferId.ReadString('\n')
+		checkError(err)
 
-	bufferId := bufio.NewReader(conn)
-	myId, err := bufferId.ReadString('\n')
-	checkError(err)
+		fmt.Println(myId)
 
-	fmt.Println(myId)
+		fmt.Println("Who's there?")
+		username, err := reader.ReadString('\n')
+		username = strings.TrimRight(string(username), "\n")
 
-	fmt.Println("Who's there?")
-	username, err := reader.ReadString('\n')
-	username = strings.TrimRight(string(username), "\n")
+		checkError(err)
 
-	checkError(err)
+		_, err = conn.Write([]byte(username))
+		checkError(err)
 
-	_, err = conn.Write([]byte(username))
-	checkError(err)
-
-	go c.receiveStuff(conn)
-	c.sendStuff(conn)
+		go c.receiveStuff(conn)
+		c.connected = true
+		c.sendStuff(conn)
+	}
 }
 
 func NewClient(receiveFunc func(string)) *Client {
 	client := new(Client)
 	client.receiveFunc = receiveFunc
+	client.outgoing = make(chan string)
 	return client
 }
 
