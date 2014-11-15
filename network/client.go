@@ -18,7 +18,8 @@ type Session struct {
 }
 
 type Client struct {
-	Connection net.Conn
+	Connection  net.Conn
+	receiveFunc func(data string)
 }
 
 func (c *Client) sendStuff(conn net.Conn) {
@@ -42,7 +43,7 @@ func (c *Client) receiveStuff(conn net.Conn) {
 		checkError(err)
 
 		if len(str) > 0 {
-			fmt.Println("SERVER RETURNS:", str)
+			c.receiveFunc(str)
 		}
 		if err != nil {
 			break
@@ -75,8 +76,9 @@ func (c *Client) Connect(address string) {
 	c.sendStuff(conn)
 }
 
-func NewClient() *Client {
+func NewClient(receiveFunc func(string)) *Client {
 	client := new(Client)
+	client.receiveFunc = receiveFunc
 	return client
 }
 
