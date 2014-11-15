@@ -88,6 +88,19 @@ func (this *DefaultLander) SetPosition(position data.Vector2D) {
 	this.position.Y = position.Y
 }
 
+func (this *DefaultLander) GetLanderState() LanderState {
+	state := LanderState{}
+
+	state.Position = this.position
+	state.Velocity = this.velocity
+	state.Rotation = 0
+	state.ThrusterState = data.ThrusterState{this.thrusterBottom.Thrusting, this.thrusterLeft.Thrusting, this.thrusterRight.Thrusting}
+	state.Exploded = this.exploded
+	state.Landed = math.Abs(this.position.Y) < 0.01 && math.Abs(this.velocity.Y) < 0.01
+
+	return state
+}
+
 // Private
 func (lander *DefaultLander) setThrust(state data.ThrusterState) {
 

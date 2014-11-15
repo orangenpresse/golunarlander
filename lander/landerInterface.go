@@ -9,6 +9,7 @@ type LanderInterface interface {
 	IsExploded() bool
 	IsLanded() bool
 	GetFuelLevel() int64
+	GetLanderState() LanderState
 	IsThrusting() data.ThrusterState
 	Update(timeDelta float64, thrusterState data.ThrusterState)
 
