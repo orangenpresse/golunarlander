@@ -1,5 +1,7 @@
 package dataObjects
 
 type Options struct {
-	DebugMode bool
+	DebugMode    bool
+	BufferWidth  int
+	BufferHeight int
 }

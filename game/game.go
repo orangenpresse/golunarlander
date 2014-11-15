@@ -58,16 +58,8 @@ func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
 }
 
 func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
-	lg.Graphic = new(graphic.Graphic)
-	g := lg.Graphic
-	g.Options = &lg.Options
-	g.shaderVersion = shaderVersion
-	g.Lander = lg.Simulation.GetLander()
-
-	g.frameBufferWidth, g.frameBufferHeight = lg.window.GetFramebufferSize()
-
-	gl.Init()
-	g.compileShaders()
+	lg.Options.BufferWidth, lg.Options.BufferHeight = lg.window.GetFramebufferSize()
+	lg.Graphic = graphic.NewGraphic(&lg.Options, shaderVersion, lg.Simulation.GetLander())
 }
 
 func (lg *LunarLanderGame) handleErrors(err glfw.ErrorCode, msg string) {
@@ -79,7 +71,8 @@ func (lg *LunarLanderGame) Start() {
 	lg.run = true
 	lg.window.SetKeyCallback(lg.handleEvents)
 	lg.timer.Start()
-	lg.Options = data.Options{false}
+	lg.Options = data.Options{}
+	lg.Options.DebugMode = false
 	lg.Simulation = simulation.Simulation{}
 	lg.Simulation.Start(&lg.Options)
 	lg.initGraphics(shaderVersion)
@@ -88,7 +81,7 @@ func (lg *LunarLanderGame) Start() {
 }
 
 func (lg *LunarLanderGame) end() {
-	lg.Graphic.end()
+	lg.Graphic.End()
 	lg.window.SetShouldClose(true)
 	lg.window.Destroy()
 	glfw.Terminate()
@@ -99,7 +92,7 @@ func (lg *LunarLanderGame) mainLoop() {
 		lg.timer.Update()
 		glfw.PollEvents()
 		lg.Simulation.Update(lg.timer.GetDelta(), lg.thrust)
-		lg.Graphic.render()
+		lg.Graphic.Render()
 		lg.window.SwapBuffers()
 	}
 }

@@ -1,4 +1,4 @@
-package graphic
+package engine
 
 import (
 	gl "github.com/go-gl/gl"
@@ -35,8 +35,7 @@ func (r *RenderObject) createAndBindVoa() {
 
 	positionAttrib := r.shaderProgram.GetAttribLocation("position")
 	positionAttrib.EnableArray()
-	defer positionAttrib.DisableArray()
-	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, 0)
+	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
 }
 
 func (r *RenderObject) GetShaderProgram() gl.Program {
@@ -45,5 +44,6 @@ func (r *RenderObject) GetShaderProgram() gl.Program {
 
 func (r *RenderObject) Draw() {
 	r.vao.Bind()
-	gl.DrawArrays(gl.TRIANGLES, 0, r.vboLength)
+	defer r.vao.Unbind()
+	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 }

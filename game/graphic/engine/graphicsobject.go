@@ -1,4 +1,4 @@
-package graphic
+package engine
 
 import (
 	"github.com/go-gl/mathgl/mgl32"
@@ -15,7 +15,6 @@ type GraphicsObject struct {
 
 func (g *GraphicsObject) InitGraphic(renderObject *RenderObject) {
 	g.renderObject = renderObject
-	g.modelMatrix = mgl32.Ident4()
 }
 
 func (g *GraphicsObject) SetScale(x float32, y float32, z float32) {
@@ -32,6 +31,10 @@ func (g *GraphicsObject) SetTranslation(x float32, y float32, z float32) {
 
 func (g *GraphicsObject) SetColor(red float32, green float32, blue float32, alpha float32) {
 	g.color = mgl32.Vec4{red, green, blue, alpha}
+}
+
+func (g *GraphicsObject) reset() {
+	g.modelMatrix = mgl32.Ident4()
 }
 
 func (g *GraphicsObject) scale() {
@@ -69,6 +72,7 @@ func (g *GraphicsObject) drawTriangles() {
 }
 
 func (g *GraphicsObject) Draw() {
+	g.reset()
 	g.scale()
 	g.rotate()
 	g.translate()

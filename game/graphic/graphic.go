@@ -5,19 +5,32 @@ import (
 	gl "github.com/go-gl/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	data "github.com/orangenpresse/golunarlander/dataObjects"
+	"github.com/orangenpresse/golunarlander/game/graphic/engine"
+	"github.com/orangenpresse/golunarlander/game/graphic/model"
 	"github.com/orangenpresse/golunarlander/lander"
 	"io/ioutil"
 )
 
 type Graphic struct {
-	shaderVersion     string
-	vertex_shader     gl.Shader
-	fragment_shader   gl.Shader
-	frameBufferHeight int
-	frameBufferWidth  int
-	program           gl.Program
-	Lander            lander.LanderInterface
-	Options           *data.Options
+	modelManager    *engine.ModelManager
+	shaderVersion   string
+	vertex_shader   gl.Shader
+	fragment_shader gl.Shader
+	program         gl.Program
+	Lander          lander.LanderInterface
+	Options         *data.Options
+	rect            *model.Rect
+}
+
+func NewGraphic(options *data.Options, shaderVersion string, lander lander.LanderInterface) *Graphic {
+	gl.Init()
+	g := new(Graphic)
+	g.Options = options
+	g.shaderVersion = shaderVersion
+	g.Lander = lander
+	g.compileShaders()
+	g.initModels()
+	return g
 }
 
 func (g *Graphic) getShaders() (vertexShader string, fragmentShader string) {
@@ -63,13 +76,19 @@ func (g *Graphic) compileShaders() {
 
 }
 
-func (g *Graphic) end() {
+func (g *Graphic) initModels() {
+	g.modelManager = engine.NewModelManager()
+	g.modelManager.RegisterModel("rect", model.Rect{}.LoadToVram(g.program))
+	g.rect = model.NewRect(g.modelManager.GetRenderObject("rect"))
+}
+
+func (g *Graphic) End() {
 	g.fragment_shader.Delete()
 	g.vertex_shader.Delete()
 	g.program.Delete()
 }
 
-func (g *Graphic) render() {
+func (g *Graphic) Render() {
 	g.clear()
 	g.setPerspectiveAndCamera()
 	g.drawMoonSurface()
@@ -79,7 +98,7 @@ func (g *Graphic) render() {
 }
 
 func (g *Graphic) clear() {
-	gl.Viewport(0, 0, g.frameBufferWidth, g.frameBufferHeight)
+	gl.Viewport(0, 0, g.Options.BufferWidth, g.Options.BufferHeight)
 	gl.ClearColor(0.0, 0.0, 0.0, 1.0)
 	gl.Clear(gl.COLOR_BUFFER_BIT)
 }
@@ -94,114 +113,52 @@ func (g *Graphic) setPerspectiveAndCamera() {
 	cameraUniform.UniformMatrix4fv(false, [16]float32(camera))
 }
 
+func (g *Graphic) drawTest() {
+	r := model.NewRect(g.modelManager.GetRenderObject("rect"))
+	r.SetColor(1.0, 0, 0, 0)
+	r.SetScale(1, 1, 1)
+	r.SetTranslation(0, 0, 0)
+	r.Draw()
+}
+
 func (g *Graphic) drawMoonSurface() {
-	model := mgl32.Ident4()
-
-	translationMatrix := mgl32.Translate3D(0.0, -8.2, 0.0)
-	model = translationMatrix.Mul4(model)
-
-	rotMatrix := mgl32.HomogRotate3D(0.0, mgl32.Vec3{0, 0, 1})
-	model = rotMatrix.Mul4(model)
-
-	scaleMatrix := mgl32.Scale3D(10.0, 0.3, 1)
-	model = scaleMatrix.Mul4(model)
-
-	modelUniform := g.program.GetUniformLocation("model")
-	modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-	positionAttrib := g.program.GetAttribLocation("position")
-	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
-	positionAttrib.EnableArray()
-	defer positionAttrib.DisableArray()
-
-	color := g.program.GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{0.7, 0.5, 0, 0})
-	g.program.BindFragDataLocation(0, "outColor")
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	g.rect.SetColor(0.7, 0.5, 0, 0)
+	g.rect.SetScale(10.0, 0.3, 1)
+	g.rect.SetTranslation(0.0, -2.45, 0.0)
+	g.rect.Draw()
 }
 
 func (g *Graphic) drawHud() {
 	posY := float32(-1.68)
 	posX := float32(-3)
 
-	// Draw outer
-	model := mgl32.Ident4()
-
-	scaleMatrix := mgl32.Scale3D(0.08, 0.4, 1)
-	model = scaleMatrix.Mul4(model)
-
-	translationMatrix := mgl32.Translate3D(posX, posY, 0.0)
-	model = translationMatrix.Mul4(model)
-
-	modelUniform := g.program.GetUniformLocation("model")
-	modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-	positionAttrib := g.program.GetAttribLocation("position")
-	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
-	positionAttrib.EnableArray()
-	defer positionAttrib.DisableArray()
-
-	color := g.program.GetUniformLocation("color")
+	// Draw Outer
 	if g.Options.DebugMode {
-		color.Uniform4fv(1, []float32{0.0, 0.3, 1.0, 0})
+		g.rect.SetColor(0.0, 0.3, 1.0, 0)
 	} else {
-		color.Uniform4fv(1, []float32{0.3, 0.3, 0.3, 0})
+		g.rect.SetColor(0.3, 0.3, 0.3, 0)
 	}
-	g.program.BindFragDataLocation(0, "outColor")
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	g.rect.SetScale(0.08, 0.4, 1)
+	g.rect.SetTranslation(posX, posY, 0)
+	g.rect.Draw()
 
 	// Draw inner
-	model2 := mgl32.Ident4()
-
-	scaleMatrix2 := mgl32.Scale3D(0.06, 0.38, 1)
-	model2 = scaleMatrix2.Mul4(model2)
-
-	translationMatrix2 := mgl32.Translate3D(posX, posY, 0.0)
-	model2 = translationMatrix2.Mul4(model2)
-
-	modelUniform2 := g.program.GetUniformLocation("model")
-	modelUniform2.UniformMatrix4fv(false, [16]float32(model2))
-
-	positionAttrib2 := g.program.GetAttribLocation("position")
-	positionAttrib2.AttribPointer(3, gl.FLOAT, false, 0, nil)
-	positionAttrib2.EnableArray()
-	defer positionAttrib2.DisableArray()
-
-	color2 := g.program.GetUniformLocation("color")
-	color2.Uniform4fv(1, []float32{0.5, 0.5, 0.5, 0})
-	g.program.BindFragDataLocation(0, "outColor")
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	g.rect.SetColor(0.5, 0.5, 0.5, 0)
+	g.rect.SetScale(0.06, 0.38, 1)
+	g.rect.SetTranslation(posX, posY, 0.0)
+	g.rect.Draw()
 
 	g.drawFuelBar(posX, posY)
 }
 
 func (g *Graphic) drawFuelBar(posX float32, posY float32) {
 	fuel := float32(g.Lander.GetFuelLevel()) / 100
+	factor := float32(0.38)
 
-	model := mgl32.Ident4()
-
-	scaleMatrix := mgl32.Scale3D(0.06, 0.38*fuel, 1)
-	model = scaleMatrix.Mul4(model)
-
-	translationMatrix := mgl32.Translate3D(posX, (posY+0.38*fuel)-0.38, 0.0)
-	model = translationMatrix.Mul4(model)
-
-	modelUniform := g.program.GetUniformLocation("model")
-	modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-	positionAttrib := g.program.GetAttribLocation("position")
-	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
-	positionAttrib.EnableArray()
-	defer positionAttrib.DisableArray()
-
-	color := g.program.GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{1 - fuel, fuel, 0.1, 0})
-	g.program.BindFragDataLocation(0, "outColor")
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	g.rect.SetScale(0.06, factor*fuel, 1)
+	g.rect.SetTranslation(posX, (posY+factor*fuel)-factor, 0.0)
+	g.rect.SetColor(1-fuel, fuel, 0.1, 0)
+	g.rect.Draw()
 }
 
 func (g *Graphic) drawLander() {
@@ -209,30 +166,14 @@ func (g *Graphic) drawLander() {
 	posY := float32(landerPos.Y/200) - 2.1
 	posX := float32(landerPos.X / 200)
 
-	model := mgl32.Ident4()
+	g.rect.SetColor(0.7, 0.5, 1, 0)
+	g.rect.SetScale(0.04, 0.06, 1)
+	g.rect.SetTranslation(posX, posY, 0.0)
+	g.rect.SetRotation(0.0, 0, 0, 1)
+	g.rect.Draw()
 
-	scaleMatrix := mgl32.Scale3D(0.04, 0.06, 1)
-	model = scaleMatrix.Mul4(model)
-
-	translationMatrix := mgl32.Translate3D(posX, posY, 0.0)
-	model = translationMatrix.Mul4(model)
-
-	rotMatrix := mgl32.HomogRotate3D(0.0, mgl32.Vec3{0, 0, 1})
-	model = rotMatrix.Mul4(model)
-
-	modelUniform := g.program.GetUniformLocation("model")
-	modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-	positionAttrib := g.program.GetAttribLocation("position")
-	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
-	positionAttrib.EnableArray()
-	defer positionAttrib.DisableArray()
-
-	color := g.program.GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{0.7, 0.5, 1, 0})
-	g.program.BindFragDataLocation(0, "outColor")
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	// Reset
+	g.rect.SetRotation(0, 0, 0, 0)
 
 	g.drawThrust(posX, posY)
 	g.drawExploded(posX, posY)
@@ -255,41 +196,18 @@ func (g *Graphic) drawThrust(posX float32, posY float32) {
 }
 
 func (g *Graphic) drawThrusterFlame(posX float32, posY float32) {
-	model := mgl32.Ident4()
+	g.rect.SetScale(0.03, 0.01, 1)
+	g.rect.SetTranslation(posX, posY, 0.0)
+	g.rect.SetColor(1, 0, 0, 0)
+	g.rect.Draw()
 
-	scaleMatrix := mgl32.Scale3D(0.03, 0.01, 1)
-	model = scaleMatrix.Mul4(model)
-
-	translationMatrix := mgl32.Translate3D(posX, posY, 0.0)
-	model = translationMatrix.Mul4(model)
-
-	modelUniform := g.program.GetUniformLocation("model")
-	modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-	color := g.program.GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{1, 0, 0, 0})
-	g.program.BindFragDataLocation(0, "outColor")
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
 }
 
 func (g *Graphic) drawExploded(posX float32, posY float32) {
 	if g.Lander.IsExploded() {
-		model := mgl32.Ident4()
-
-		scaleMatrix := mgl32.Scale3D(0.1, 0.1, 1)
-		model = scaleMatrix.Mul4(model)
-
-		translationMatrix := mgl32.Translate3D(posX, posY, 0.0)
-		model = translationMatrix.Mul4(model)
-
-		modelUniform := g.program.GetUniformLocation("model")
-		modelUniform.UniformMatrix4fv(false, [16]float32(model))
-
-		color := g.program.GetUniformLocation("color")
-		color.Uniform4fv(1, []float32{1, 1, 0, 0})
-		g.program.BindFragDataLocation(0, "outColor")
-
-		gl.DrawArrays(gl.TRIANGLES, 0, 6)
+		g.rect.SetScale(0.1, 0.1, 1)
+		g.rect.SetTranslation(posX, posY, 0.0)
+		g.rect.SetColor(1, 1, 0, 0)
+		g.rect.Draw()
 	}
 }
