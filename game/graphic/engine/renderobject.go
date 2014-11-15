@@ -23,7 +23,7 @@ func NewRenderObject(verticies []float32, shaderProgram gl.Program) *RenderObjec
 }
 
 func (r *RenderObject) createAndBindVbo(verticies []float32) {
-	r.vboLength = len(verticies)
+	r.vboLength = len(verticies) / 3
 	r.vbo = gl.GenBuffer()
 	r.vbo.Bind(gl.ARRAY_BUFFER)
 	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*FLOAT32_BYTE_SIZE, verticies, gl.STATIC_DRAW)
@@ -45,5 +45,5 @@ func (r *RenderObject) GetShaderProgram() gl.Program {
 func (r *RenderObject) Draw() {
 	r.vao.Bind()
 	defer r.vao.Unbind()
-	gl.DrawArrays(gl.TRIANGLES, 0, 6)
+	gl.DrawArrays(gl.TRIANGLES, 0, r.vboLength)
 }
