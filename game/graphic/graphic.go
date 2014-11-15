@@ -32,8 +32,8 @@ func NewGraphic(options *data.Options, shaderVersion string, lander lander.Lande
 }
 
 func (g *Graphic) createProgram() {
-	g.vertex_shader = engine.NewShader("./game/shader/vertexShader", g.shaderVersion, gl.VERTEX_SHADER)
-	g.fragment_shader = engine.NewShader("./game/shader/fragmentShader", g.shaderVersion, gl.FRAGMENT_SHADER)
+	g.vertex_shader = engine.NewShader("./game/graphic/shader/vertexShader", g.shaderVersion, gl.VERTEX_SHADER)
+	g.fragment_shader = engine.NewShader("./game/graphic/shader/fragmentShader", g.shaderVersion, gl.FRAGMENT_SHADER)
 
 	g.program = gl.CreateProgram()
 	g.program.AttachShader(g.vertex_shader)
