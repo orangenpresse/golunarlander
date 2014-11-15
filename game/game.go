@@ -99,9 +99,9 @@ func (lg *LunarLanderGame) mainLoop() {
 		lg.timer.Update()
 		glfw.PollEvents()
 		lg.Simulation.Update(lg.timer.GetDelta(), lg.thrust)
-		lg.Multiplayer.GetLanders()
+		landers := lg.Multiplayer.GetLanders()
 		lg.Multiplayer.SendUpdate()
-		lg.Graphic.Render()
+		lg.Graphic.Render(landers)
 		lg.window.SwapBuffers()
 	}
 }

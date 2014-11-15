@@ -46,7 +46,7 @@ func (c *Client) SendData(data string) {
 func (c *Client) receiveStuff(conn net.Conn) {
 	buffer := bufio.NewReader(conn)
 	for {
-		str, err := buffer.ReadString('\n')
+		str, err := buffer.ReadString(';')
 		checkError(err)
 
 		if len(str) > 0 {

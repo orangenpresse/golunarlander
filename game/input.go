@@ -35,6 +35,7 @@ func (lg *LunarLanderGame) handleEvents(w *glfw.Window, key glfw.Key, scancode i
 	if key == glfw.KeyR {
 		lg.Simulation.Start(&lg.Options)
 		lg.Graphic.Lander = lg.Simulation.GetLander()
+		lg.Multiplayer.Lander = lg.Simulation.GetLander()
 	}
 
 	// D

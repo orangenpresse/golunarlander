@@ -56,11 +56,16 @@ func (g *Graphic) End() {
 	g.program.Delete()
 }
 
-func (g *Graphic) Render() {
+func (g *Graphic) Render(landers []lander.LanderInterface) {
 	g.clear()
 	g.setPerspectiveAndCamera()
 	g.drawMoonSurface()
 	g.drawLander(nil)
+
+	for _, playerLander := range landers {
+		g.drawLander(playerLander)
+	}
+
 	g.drawHud()
 
 }

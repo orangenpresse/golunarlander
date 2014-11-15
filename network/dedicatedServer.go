@@ -80,6 +80,7 @@ func (this *Server) makeUpdate() string {
 		data += "\n"
 	}
 
+	data += ";"
 	defer fmt.Println(data)
 	return data
 }
