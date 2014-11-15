@@ -1,14 +1,12 @@
 package graphic
 
 import (
-	"fmt"
 	gl "github.com/go-gl/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	data "github.com/orangenpresse/golunarlander/dataObjects"
 	"github.com/orangenpresse/golunarlander/game/graphic/engine"
 	"github.com/orangenpresse/golunarlander/game/graphic/model"
 	"github.com/orangenpresse/golunarlander/lander"
-	"io/ioutil"
 )
 
 type Graphic struct {
@@ -28,45 +26,14 @@ func NewGraphic(options *data.Options, shaderVersion string, lander lander.Lande
 	g.Options = options
 	g.shaderVersion = shaderVersion
 	g.Lander = lander
-	g.compileShaders()
+	g.createProgram()
 	g.initModels()
 	return g
 }
 
-func (g *Graphic) getShaders() (vertexShader string, fragmentShader string) {
-	if data, err := ioutil.ReadFile("./game/shader/vertexShader" + g.shaderVersion + ".glsl"); err != nil {
-		fmt.Println("VertexShader Read Error:" + err.Error())
-		panic("VertexShader not found")
-	} else {
-		vertexShader = string(data)
-	}
-
-	if data, err := ioutil.ReadFile("./game/shader/fragmentShader" + g.shaderVersion + ".glsl"); err != nil {
-		fmt.Println("FragmentShader Read Error:" + err.Error())
-		panic("FragmentShader not found")
-	} else {
-		fragmentShader = string(data)
-	}
-
-	return vertexShader, fragmentShader
-}
-
-func (g *Graphic) compileShaders() {
-	vertexShader, fragmentShader := g.getShaders()
-
-	g.vertex_shader = gl.CreateShader(gl.VERTEX_SHADER)
-	g.vertex_shader.Source(vertexShader)
-	g.vertex_shader.Compile()
-	if info := g.vertex_shader.GetInfoLog(); info != "" {
-		fmt.Println(info)
-	}
-
-	g.fragment_shader = gl.CreateShader(gl.FRAGMENT_SHADER)
-	g.fragment_shader.Source(fragmentShader)
-	g.fragment_shader.Compile()
-	if info := g.fragment_shader.GetInfoLog(); info != "" {
-		fmt.Println(info)
-	}
+func (g *Graphic) createProgram() {
+	g.vertex_shader = engine.NewShader("./game/shader/vertexShader", g.shaderVersion, gl.VERTEX_SHADER)
+	g.fragment_shader = engine.NewShader("./game/shader/fragmentShader", g.shaderVersion, gl.FRAGMENT_SHADER)
 
 	g.program = gl.CreateProgram()
 	g.program.AttachShader(g.vertex_shader)
