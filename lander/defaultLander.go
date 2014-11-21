@@ -137,7 +137,6 @@ func (this *DefaultLander) calculateFallingAcceleration() float64 {
 		this.velocity.Y = 0.0
 		this.position.Y = 0.0
 		this.velocity.X = 0.0
-
 		return 0.0
 	}
 }
