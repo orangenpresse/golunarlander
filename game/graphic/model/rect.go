@@ -1,7 +1,6 @@
 package model
 
 import (
-	gl "github.com/go-gl/gl"
 	"github.com/orangenpresse/golunarlander/game/graphic/engine"
 )
 
@@ -9,7 +8,7 @@ type Rect struct {
 	engine.GraphicsObject
 }
 
-func (r Rect) LoadToVram(shaderProgram gl.Program) *engine.RenderObject {
+func (r Rect) LoadToVram(shaderProgram uint32) *engine.RenderObject {
 	verticies := []float32{
 		-1, -1, 0,
 		1, -1, 0,

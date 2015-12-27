@@ -1,20 +1,20 @@
 package engine
 
 import (
-	gl "github.com/go-gl/gl"
+	gl "github.com/go-gl/gl/v3.3-core/gl"
 	"unsafe"
 )
 
 const FLOAT32_BYTE_SIZE int = int(unsafe.Sizeof(float32(0)))
 
 type RenderObject struct {
-	shaderProgram gl.Program
-	vao           gl.VertexArray
-	vbo           gl.Buffer
-	vboLength     int
+	shaderProgram uint32
+	vao           uint32
+	vbo           uint32
+	vboLength     int32
 }
 
-func NewRenderObject(verticies []float32, shaderProgram gl.Program) *RenderObject {
+func NewRenderObject(verticies []float32, shaderProgram uint32) *RenderObject {
 	renderObject := new(RenderObject)
 	renderObject.shaderProgram = shaderProgram
 	renderObject.createAndBindVbo(verticies)
@@ -23,27 +23,35 @@ func NewRenderObject(verticies []float32, shaderProgram gl.Program) *RenderObjec
 }
 
 func (r *RenderObject) createAndBindVbo(verticies []float32) {
-	r.vboLength = len(verticies) / 3
-	r.vbo = gl.GenBuffer()
-	r.vbo.Bind(gl.ARRAY_BUFFER)
-	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*FLOAT32_BYTE_SIZE, verticies, gl.STATIC_DRAW)
+	r.vboLength = int32(len(verticies) / 3)
+	gl.GenBuffers(1, &r.vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, r.vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(verticies)*FLOAT32_BYTE_SIZE, gl.Ptr(verticies), gl.STATIC_DRAW)
 }
 
 func (r *RenderObject) createAndBindVoa() {
-	r.vao = gl.GenVertexArray()
-	r.vao.Bind()
+	gl.GenVertexArrays(1, &r.vao)
+	gl.BindVertexArray(r.vao)
 
-	positionAttrib := r.shaderProgram.GetAttribLocation("position")
-	positionAttrib.EnableArray()
-	positionAttrib.AttribPointer(3, gl.FLOAT, false, 0, nil)
+	positionAttrib := uint32(gl.GetAttribLocation(r.shaderProgram, gl.Str("position\x00")))
+	gl.EnableVertexAttribArray(positionAttrib)
+	gl.VertexAttribPointer(positionAttrib, 3, gl.FLOAT, false, 0, gl.PtrOffset(0))
 }
 
-func (r *RenderObject) GetShaderProgram() gl.Program {
+func (r *RenderObject) GetShaderProgram() uint32 {
 	return r.shaderProgram
 }
 
+func (r *RenderObject) GetUniformLocation(name string) int32 {
+	return gl.GetUniformLocation(r.shaderProgram, gl.Str(name+"\x00"))
+}
+
+func (r *RenderObject) BindFragDataLocation(color uint32, name string) {
+	gl.BindFragDataLocation(r.shaderProgram, color, gl.Str(name+"\x00"))
+}
+
 func (r *RenderObject) Draw() {
-	r.vao.Bind()
-	defer r.vao.Unbind()
+	gl.BindVertexArray(r.vao)
+	defer gl.BindVertexArray(0) // Unbind it
 	gl.DrawArrays(gl.TRIANGLES, 0, r.vboLength)
 }

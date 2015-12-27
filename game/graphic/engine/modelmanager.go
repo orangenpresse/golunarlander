@@ -1,12 +1,7 @@
 package engine
 
-import (
-	gl "github.com/go-gl/gl"
-)
-
 type ModelManager struct {
-	models        map[string]*RenderObject
-	shaderProgram *gl.Program
+	models map[string]*RenderObject
 }
 
 func NewModelManager() *ModelManager {

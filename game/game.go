@@ -2,7 +2,7 @@ package game
 
 import (
 	"fmt"
-	glfw "github.com/go-gl/glfw3"
+	glfw "github.com/go-gl/glfw/v3.1/glfw"
 	data "github.com/orangenpresse/golunarlander/dataObjects"
 	"github.com/orangenpresse/golunarlander/game/graphic"
 	"github.com/orangenpresse/golunarlander/game/multiplayer"
@@ -26,17 +26,17 @@ type LunarLanderGame struct {
 func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
 	runtime.LockOSThread()
 
-	glfw.SetErrorCallback(lg.handleErrors)
+	// glfw.SetErrorCallback(lg.handleErrors)
 
 	glfw.Init()
 
 	version := glfw.GetVersionString()
 	fmt.Println(version)
-	if version == "3.0.4 Cocoa NSGL chdir menubar" || version == "3.1.0 Cocoa NSGL chdir menubar retina dynamic" {
+	if version == "3.0.4 Cocoa NSGL chdir menubar" || version == "3.1.2 Cocoa NSGL chdir menubar retina" {
 		glfw.WindowHint(glfw.ContextVersionMajor, 3)
 		glfw.WindowHint(glfw.ContextVersionMinor, 3)
-		glfw.WindowHint(glfw.OpenglForwardCompatible, glfw.True)
-		glfw.WindowHint(glfw.OpenglProfile, glfw.OpenglCoreProfile)
+		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+		glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 		shaderVersion = "330"
 	} else {
 		shaderVersion = "130"
@@ -60,7 +60,7 @@ func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
 }
 
 func (lg *LunarLanderGame) initGraphics(shaderVersion string) {
-	lg.Options.BufferWidth, lg.Options.BufferHeight = lg.window.GetFramebufferSize()
+	lg.Options.SetDimensions(lg.window.GetFramebufferSize())
 	lg.Graphic = graphic.NewGraphic(&lg.Options, shaderVersion, lg.Simulation.GetLander())
 }
 

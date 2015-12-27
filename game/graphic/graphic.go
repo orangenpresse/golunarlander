@@ -1,7 +1,7 @@
 package graphic
 
 import (
-	gl "github.com/go-gl/gl"
+	gl "github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 	data "github.com/orangenpresse/golunarlander/dataObjects"
 	"github.com/orangenpresse/golunarlander/game/graphic/engine"
@@ -12,9 +12,9 @@ import (
 type Graphic struct {
 	modelManager    *engine.ModelManager
 	shaderVersion   string
-	vertex_shader   gl.Shader
-	fragment_shader gl.Shader
-	program         gl.Program
+	vertex_shader   uint32
+	fragment_shader uint32
+	program         uint32
 	Lander          lander.LanderInterface
 	OtherLanders    []lander.LanderInterface
 	Options         *data.Options
@@ -33,15 +33,22 @@ func NewGraphic(options *data.Options, shaderVersion string, lander lander.Lande
 }
 
 func (g *Graphic) createProgram() {
-	g.vertex_shader = engine.NewShader("./game/graphic/shader/vertexShader", g.shaderVersion, gl.VERTEX_SHADER)
-	g.fragment_shader = engine.NewShader("./game/graphic/shader/fragmentShader", g.shaderVersion, gl.FRAGMENT_SHADER)
+	var err error
+	g.vertex_shader, err = engine.NewShader("./game/graphic/shader/vertexShader", g.shaderVersion, gl.VERTEX_SHADER)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	g.fragment_shader, err = engine.NewShader("./game/graphic/shader/fragmentShader", g.shaderVersion, gl.FRAGMENT_SHADER)
+	if err != nil {
+		panic(err.Error())
+	}
 
 	g.program = gl.CreateProgram()
-	g.program.AttachShader(g.vertex_shader)
-	g.program.AttachShader(g.fragment_shader)
-	g.program.Link()
-	g.program.Use()
-
+	gl.AttachShader(g.program, g.vertex_shader)
+	gl.AttachShader(g.program, g.fragment_shader)
+	gl.LinkProgram(g.program)
+	gl.UseProgram(g.program)
 }
 
 func (g *Graphic) initModels() {
@@ -51,9 +58,9 @@ func (g *Graphic) initModels() {
 }
 
 func (g *Graphic) End() {
-	g.fragment_shader.Delete()
-	g.vertex_shader.Delete()
-	g.program.Delete()
+	gl.DeleteShader(g.fragment_shader)
+	gl.DeleteShader(g.vertex_shader)
+	gl.DeleteProgram(g.program)
 }
 
 func (g *Graphic) Render(landers []lander.LanderInterface) {
@@ -78,12 +85,12 @@ func (g *Graphic) clear() {
 
 func (g *Graphic) setPerspectiveAndCamera() {
 	projection := mgl32.Perspective(70.0, float32(800)/600, 0.1, 10.0)
-	projectionUniform := g.program.GetUniformLocation("projection")
-	projectionUniform.UniformMatrix4fv(false, [16]float32(projection))
+	projectionUniform := gl.GetUniformLocation(g.program, gl.Str("projection\x00"))
+	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
 
 	camera := mgl32.LookAtV(mgl32.Vec3{0, 0, 5}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := g.program.GetUniformLocation("camera")
-	cameraUniform.UniformMatrix4fv(false, [16]float32(camera))
+	cameraUniform := gl.GetUniformLocation(g.program, gl.Str("camera\x00"))
+	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
 }
 
 func (g *Graphic) drawTest() {

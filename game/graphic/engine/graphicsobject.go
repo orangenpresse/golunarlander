@@ -1,6 +1,7 @@
 package engine
 
 import (
+	gl "github.com/go-gl/gl/v3.3-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -56,15 +57,17 @@ func (g *GraphicsObject) translate() {
 }
 
 func (g *GraphicsObject) applyModelUniform() {
-	modelUniform := g.renderObject.GetShaderProgram().GetUniformLocation("model")
-	modelUniform.UniformMatrix4fv(false, [16]float32(g.modelMatrix))
+	location := g.renderObject.GetUniformLocation("model")
+	gl.UniformMatrix4fv(location, 1, false, &g.modelMatrix[0])
+
 }
 
 func (g *GraphicsObject) applyColor() {
 	colorVector := g.color
-	color := g.renderObject.GetShaderProgram().GetUniformLocation("color")
-	color.Uniform4fv(1, []float32{colorVector.X(), colorVector.Y(), colorVector.Z(), colorVector.W()})
-	g.renderObject.GetShaderProgram().BindFragDataLocation(0, "outColor")
+	location := g.renderObject.GetUniformLocation("color")
+	color := []float32{colorVector.X(), colorVector.Y(), colorVector.Z(), colorVector.W()}
+	gl.Uniform4fv(location, 1, &color[0])
+	g.renderObject.BindFragDataLocation(0, "outColor")
 }
 
 func (g *GraphicsObject) drawTriangles() {
