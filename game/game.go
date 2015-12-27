@@ -26,8 +26,6 @@ type LunarLanderGame struct {
 func (lg *LunarLanderGame) CreateWindow() (shaderVersion string) {
 	runtime.LockOSThread()
 
-	// glfw.SetErrorCallback(lg.handleErrors)
-
 	glfw.Init()
 
 	version := glfw.GetVersionString()
