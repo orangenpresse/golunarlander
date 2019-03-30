@@ -34,8 +34,8 @@ func (s *Shader) read() string {
 
 func (s *Shader) compile(source string) (uint32, error) {
 	shader := gl.CreateShader(s.shaderType)
-	csource := gl.Str(source + "\x00")
-	gl.ShaderSource(shader, 1, &csource, nil)
+	csource, _ := gl.Strs(source + "\x00")
+	gl.ShaderSource(shader, 1, csource, nil)
 	gl.CompileShader(shader)
 
 	var status int32
